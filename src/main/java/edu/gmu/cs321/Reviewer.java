@@ -1,3 +1,5 @@
+package edu.gmu.cs321;
+
 public class Reviewer {
     private boolean reviewRequest(){
         return true;
