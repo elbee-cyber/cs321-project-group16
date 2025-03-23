@@ -23,6 +23,9 @@ public class RequestForm {
     }
 
     public void setFormID(String formID) {
+        if (formID == null) {
+            throw new IllegalArgumentException();
+        }
         this.formID = formID;
     }
 
@@ -32,6 +35,9 @@ public class RequestForm {
     }
 
     public void setRequestorName(String requestorName) {
+        if (requestorName == null) {
+            throw new IllegalArgumentException();
+        }
         this.requestorName = requestorName;
     }
 
@@ -41,6 +47,9 @@ public class RequestForm {
     }
 
     public void setRequestorCitizenship(String requestorCitizenship) {
+        if (requestorCitizenship == null) {
+            throw new IllegalArgumentException();
+        }
         this.requestorCitizenship = requestorCitizenship;
     }
 
@@ -50,6 +59,9 @@ public class RequestForm {
     }
 
     public void setDeceasedPersonName(String deceasedPersonName) {
+        if (deceasedPersonName == null) {
+            throw new IllegalArgumentException();
+        }
         this.deceasedPersonName = deceasedPersonName;
     }
 

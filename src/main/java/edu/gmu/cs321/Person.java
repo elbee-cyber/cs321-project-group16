@@ -30,6 +30,9 @@ public class Person {
     }
 
     public void setFirstName(String firstName) {
+        if (firstName == null) {
+            throw new IllegalArgumentException();
+        }
         this.firstName = firstName;
     }
 
@@ -39,6 +42,9 @@ public class Person {
     }
 
     public void setLastName(String lastName) {
+        if (lastName == null) {
+            throw new IllegalArgumentException();
+        }
         this.lastName = lastName;
     }
 
@@ -48,6 +54,9 @@ public class Person {
     }
 
     public void setEmail(String email) {
+        if (email == null) {
+            throw new IllegalArgumentException();
+        }
         this.email = email;
     }
 
@@ -57,6 +66,9 @@ public class Person {
     }
 
     public void setCitizenshipStatus(String citizenshipStatus) {
+        if (citizenshipStatus == null) {
+            throw new IllegalArgumentException();
+        }
         this.citizenshipStatus = citizenshipStatus;
     }
 
@@ -66,6 +78,9 @@ public class Person {
     }
 
     public void setDateOfBirth(String dateOfBirth) {
+        if (dateOfBirth == null) {
+            throw new IllegalArgumentException();
+        }
         this.dateOfBirth = dateOfBirth;
     }
 
@@ -75,6 +90,9 @@ public class Person {
     }
 
     public void setCity(String city) {
+        if (city == null) {
+            throw new IllegalArgumentException();
+        }
         this.city = city;
     }
 
@@ -84,6 +102,9 @@ public class Person {
     }
 
     public void setState(String state) {
+        if (state == null) {
+            throw new IllegalArgumentException();
+        }
         this.state = state;
     }
 
@@ -93,6 +114,9 @@ public class Person {
     }
 
     public void setZipCode(String zipCode) {
+        if (zipCode == null) {
+            throw new IllegalArgumentException();
+        }
         this.zipCode = zipCode;
     }
 
@@ -102,6 +126,9 @@ public class Person {
     }
 
     public void setPhoneNumber(String phoneNumber) {
+        if (phoneNumber == null) {
+            throw new IllegalArgumentException();
+        }
         this.phoneNumber = phoneNumber;
     }
 
