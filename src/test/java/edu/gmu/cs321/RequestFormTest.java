@@ -4,10 +4,10 @@ import static org.junit.Assert.*;
 
 public class RequestFormTest {
 
+    RequestForm form = new RequestForm("123", "John Doe", "US Citizen", "Jane Doe", true);
+
     @Test
     public void testCreateRequestForm() {
-        RequestForm form = new RequestForm("123", "John Doe", "US Citizen", "Jane Doe", true);
-        
         assertEquals("123", form.getFormID());
         assertEquals("John Doe", form.getRequestorName());
         assertEquals("US Citizen", form.getRequestorCitizenship());
@@ -16,61 +16,60 @@ public class RequestFormTest {
     }
 
     @Test
-    public void testUpdateRequestForm() {
-        RequestForm form = new RequestForm("123", "John Doe", "US Citizen", "Jane Doe", true);
-        
+    public void testCorrectSettersAndGetters() {
+        form.setFormID("124");
         form.setRequestorName("Alice Johnson");
+        form.setRequestorCitizenship("Non-US Citizen");
         form.setDeceasedPersonName("Bob Johnson");
-        
-        assertEquals("Alice Johnson", form.getRequestorName());
-        assertEquals("Bob Johnson", form.getDeceasedPersonName());
-    }
-
-    @Test
-    public void testUpdateFormLegibility() {
-        RequestForm form = new RequestForm("123", "John Doe", "US Citizen", "Jane Doe", true);
-        
         form.setLegible(false);
-        
+
+        assertEquals("124", form.getFormID());
+        assertEquals("Alice Johnson", form.getRequestorName());
+        assertEquals("Non-US Citizen", form.getRequestorCitizenship());
+        assertEquals("Bob Johnson", form.getDeceasedPersonName());
         assertFalse(form.isLegible());
     }
 
-    @Test
-    public void testGetRequestorName() {
-        RequestForm form = new RequestForm("123", "John Doe", "US Citizen", "Jane Doe", true);
-        
-        assertEquals("John Doe", form.getRequestorName());
+    @Test(expected = IllegalArgumentException.class)
+    public void testIncorrectSetters() {
+        form.setFormID(null);
+        form.setRequestorName(null);
+        form.setRequestorCitizenship(null);
+        form.setDeceasedPersonName(null);
+        form.setLegible(false);
     }
 
     @Test
-    public void testGetDeceasedPersonName() {
-        RequestForm form = new RequestForm("123", "John Doe", "US Citizen", "Jane Doe", true);
+    public void testValidateForm_Success() {
+        form.setRequestorName("John Doe");
+        form.setRequestorCitizenship("US Citizen");
+        form.setDeceasedPersonName("Jane Doe");
         
-        assertEquals("Jane Doe", form.getDeceasedPersonName());
+        boolean isValid = form.validateForm();
+        assertTrue(isValid);
     }
 
     @Test
-    public void testGetFormID() {
-        RequestForm form = new RequestForm("123", "John Doe", "US Citizen", "Jane Doe", true);
+    public void testValidateForm_Failure_MissingRequestorName() {
+        form.setRequestorName(null);
         
-        assertEquals("123", form.getFormID());
+        boolean isValid = form.validateForm();
+        assertFalse(isValid);
     }
 
     @Test
-    public void testGetRequestorCitizenship() {
-        RequestForm form = new RequestForm("123", "John Doe", "US Citizen", "Jane Doe", true);
+    public void testValidateForm_Failure_NonUSCitizen() {
+        form.setRequestorCitizenship("Non-US Citizen");
         
-        assertEquals("US Citizen", form.getRequestorCitizenship());
+        boolean isValid = form.validateForm();
+        assertFalse(isValid);
     }
 
     @Test
-    public void testGetCompleteStatus() {
-        RequestForm form = new RequestForm("123", "John Doe", "US Citizen", "Jane Doe", true);
+    public void testValidateForm_Failure_NonLegible() {
+        form.setLegible(false);
         
-        assertFalse(form.isComplete());
-        
-        form.setComplete(true);
-        
-        assertTrue(form.isComplete());
+        boolean isValid = form.validateForm();
+        assertFalse(isValid);
     }
 }
