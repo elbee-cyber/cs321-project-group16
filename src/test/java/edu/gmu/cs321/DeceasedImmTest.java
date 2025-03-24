@@ -2,17 +2,32 @@ package edu.gmu.cs321;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
+/**
+ * This class contains unit tests for the DeceasedImmigrant class.
+ * It tests the creation, setters/getters, and validation methods.
+ */
 public class DeceasedImmTest {
     
-    DeceasedImmigrant newImm = new DeceasedImmigrant("John", "Smith", "jsmith@gmu.edu","Citizen", "01/01/2000", "Fairfax", "VA", "22030", "123-456-7890", 123, "England");
+    DeceasedImmigrant newImm = new DeceasedImmigrant("John", "Smith", "jsmith@gmu.edu",
+                                                        "Citizen", "01/01/2000", "Fairfax", "VA", "22030", 
+                                                        "123-456-7890", 123, "England");
 
+    /**
+     * Tests the correct creation of a DeceasedImmigrant object.
+     * Verifies that the object is created with the expected field values.
+     */
     @Test
-    public void testCreateNewImm() {        
+    public void createNewImm_validData_objectCreatedCorrectly() {        
         assertEquals("Name: John Smith, Email: jsmith@gmu.edu, Citizenship Status: Citizen, Address: Fairfax, VA 22030\nImmigrant ID: 123\nCountry of Origin: England", newImm.toString());
     }
 
+    /**
+     * Tests the setters and getters of the DeceasedImmigrant class
+     * Verifies that the setters correctly update the 
+     * object fields and getters return expected values.
+     */
     @Test
-    public void testCorrectSettersAndGetters() {
+    public void settersAndGetters_validData_updatedCorrectly() {
         newImm.setFirstName("Jane");
         newImm.setLastName("Doe");
         newImm.setEmail("jdoe@gmu.edu");
@@ -38,8 +53,12 @@ public class DeceasedImmTest {
         assertEquals("France", newImm.getCountryOfOrigin());
     }
 
+    /**
+     * Tests the setters with invalid input.
+     * Verifies that the setters throw an IllegalArgumentException for invalid values.
+     */
     @Test(expected = IllegalArgumentException.class)
-    public void testIncorrectSetters() {
+    public void setters_invalidData_throwsIllegalArgumentException() {
         newImm.setFirstName(null);
         newImm.setLastName(null);
         newImm.setEmail(null);

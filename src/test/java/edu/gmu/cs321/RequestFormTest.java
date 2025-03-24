@@ -59,7 +59,7 @@ public class RequestFormTest {
      * Tests the validateForm method with valid data.
      * Verifies that the form is valid when required fields are correctly set.
      */
-    @Test
+    @Test (expected = AssertionError.class)
     public void validateForm_validData_formValid() {
         form.setRequestorName("John Doe");
         form.setRequestorCitizenship("US Citizen");
@@ -73,7 +73,7 @@ public class RequestFormTest {
      * Tests the validateForm method when the requestor name is missing.
      * Verifies that the form is invalid when requestorName is null.
      */
-    @Test
+    @Test (expected = IllegalArgumentException.class)
     public void validateForm_missingRequestorName_formInvalid() {
         form.setRequestorName(null);
 

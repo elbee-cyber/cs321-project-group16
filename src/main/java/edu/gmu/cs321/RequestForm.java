@@ -48,6 +48,9 @@ public class RequestForm {
      * @param formID the formID to set.
      */
     public void setFormID(String formID) {
+        if (formID == null) {
+            throw new IllegalArgumentException();
+        }
         this.formID = formID;
     }
 
@@ -66,6 +69,9 @@ public class RequestForm {
      * @param requestorName the requestor's name to set.
      */
     public void setRequestorName(String requestorName) {
+        if (requestorName == null) {
+            throw new IllegalArgumentException();
+        }
         this.requestorName = requestorName;
     }
 
@@ -84,6 +90,9 @@ public class RequestForm {
      * @param requestorCitizenship the citizenship status to set.
      */
     public void setRequestorCitizenship(String requestorCitizenship) {
+        if (requestorCitizenship == null) {
+            throw new IllegalArgumentException();
+        }
         this.requestorCitizenship = requestorCitizenship;
     }
 
@@ -102,6 +111,9 @@ public class RequestForm {
      * @param deceasedPersonName the deceased person's name to set.
      */
     public void setDeceasedPersonName(String deceasedPersonName) {
+        if (deceasedPersonName == null) {
+            throw new IllegalArgumentException();
+        }
         this.deceasedPersonName = deceasedPersonName;
     }
 
