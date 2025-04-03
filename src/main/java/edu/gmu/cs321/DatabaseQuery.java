@@ -1,25 +1,41 @@
 package edu.gmu.cs321;
 
 import java.sql.Connection;
+import java.sql.Statement;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
 public class DatabaseQuery {
-    private static final String url = "jdbc:mysql://localhost:3306/your_database";
-    private static final String user = "your_username";
-    private static final String pass = "your_pass";
+    private final String url = "jdbc:mysql://localhost:3306/cs321";
+    private final String user = "root";
+    private final String pass = "elbee";
+    private Connection connection;
 
     public Connection connect() throws SQLException {
-        return DriverManager.getConnection(url, user, pass);
+        this.connection = DriverManager.getConnection(url, user, pass);
+        return this.connection;
     }
 
-    public ResultSet executeQuery(String query, Object... parameters) throws SQLException {
-        return null;
+    public ResultSet executeQuery(String query) throws SQLException {
+        Statement stmt = connection.createStatement();
+        return stmt.executeQuery(query);
     }
 
-    public ResultSet escapedQuery(String query, Object... parameters) throws SQLException {
-        return null;
+    public ResultSet executePQuery(String query, Object... col_values) throws SQLException {
+        PreparedStatement pstmt = connection.prepareStatement(query);
+        int index = 1;
+        for (Object value : col_values) {
+            pstmt.setObject(index, value);
+            index++;
+        }
+        System.out.println(pstmt.toString());
+
+        ResultSet resultSet = pstmt.executeQuery();
+
+        return resultSet;
     }
 
     public int executeUpdate(String query, Object... parameters) throws SQLException {

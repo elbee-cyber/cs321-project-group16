@@ -12,6 +12,9 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
+import java.sql.ResultSet;
+import edu.gmu.cs321.Reviewer.Dashboard;
+
 
 public class LoginScreen extends Application {
 
@@ -32,6 +35,17 @@ public class LoginScreen extends Application {
 
         // db connection
         DatabaseQuery db = new DatabaseQuery();
+        try{
+            db.connect();
+        }catch(java.sql.SQLException e){
+            e.printStackTrace();
+            failAlert.setTitle("Database Connection Failed");
+            failAlert.setHeaderText("Database Connection Failed");
+            failAlert.setContentText("Please restart the application.");
+            failAlert.showAndWait();
+            return;
+        }
+        
 
         Label headingLabel = new Label("Reviewer Dashboard");
         headingLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
@@ -49,8 +63,11 @@ public class LoginScreen extends Application {
         PasswordField pwBox = new PasswordField();
         grid.add(pwBox, 1, 2);
 
+        Label defaultCreds = new Label("Default creds: guest/guest");
+        grid.add(defaultCreds, 1, 3);
+
         Button loginButton = new Button("Login");
-        grid.add(loginButton, 1, 3);
+        grid.add(loginButton, 1, 4);
 
         // login button action
         loginButton.setOnAction(event -> {
@@ -58,6 +75,10 @@ public class LoginScreen extends Application {
             String password = pwBox.getText();
             String hashedPassword;
             
+            Integer currentUserId;
+            String currentUserRole;
+            String currentUser;
+
             // try to hash the input password
             try {
                 java.security.MessageDigest digest = java.security.MessageDigest.getInstance("SHA-256");
@@ -75,18 +96,19 @@ public class LoginScreen extends Application {
             }
 
             // check that there is a row for username and hash(password)
-            boolean isValidUser = false;
             try {
                 String query = "SELECT * FROM users WHERE username = ? and password = ?";
-                try{
-                    if (db.executeQuery(query, username, hashedPassword).next()) {
-                        isValidUser = true;
-                    }
-                }
-                catch(NullPointerException e){
+                ResultSet rs = db.executePQuery(query, username, hashedPassword);
+
+                if(!rs.next())
                     throw new java.sql.SQLException();
-                }
+
+                currentUserId = rs.getInt(1);
+                currentUserRole = rs.getString(2);
+                currentUser = rs.getString(3);
+
             } catch (java.sql.SQLException e) {
+                e.printStackTrace();
                 failAlert.setTitle("Invalid credentials!");
                 failAlert.setHeaderText("Invalid credentials!");
                 failAlert.setContentText("Please try again.");
@@ -95,6 +117,9 @@ public class LoginScreen extends Application {
             }
 
             // code to select username from the ResultsSet and open ReviewerDashboard
+            primaryStage.hide();
+            Dashboard dashboard = new Dashboard(currentUserId, currentUserRole, currentUser, db);
+            dashboard.startScreen(primaryStage);
         });
 
         // scene
