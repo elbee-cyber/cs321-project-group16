@@ -1,5 +1,7 @@
 package edu.gmu.cs321.Reviewer;
 
+import java.sql.ResultSet;
+
 import edu.gmu.cs321.DatabaseQuery;
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -12,8 +14,6 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
-import java.sql.ResultSet;
-import edu.gmu.cs321.Reviewer.Dashboard;
 
 
 public class LoginScreen extends Application {
@@ -36,7 +36,7 @@ public class LoginScreen extends Application {
         // db connection
         DatabaseQuery db = new DatabaseQuery();
         try{
-            db.connect();
+            db.connect("root","elbee");
         }catch(java.sql.SQLException e){
             e.printStackTrace();
             failAlert.setTitle("Database Connection Failed");

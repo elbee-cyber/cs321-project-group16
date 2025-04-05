@@ -1,20 +1,17 @@
 package edu.gmu.cs321;
 
 import java.sql.Connection;
-import java.sql.Statement;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 public class DatabaseQuery {
     private final String url = "jdbc:mysql://localhost:3306/cs321";
-    private final String user = "root";
-    private final String pass = "elbee";
     private Connection connection;
 
-    public Connection connect() throws SQLException {
+    public Connection connect(String user, String pass) throws SQLException {
         this.connection = DriverManager.getConnection(url, user, pass);
         return this.connection;
     }
