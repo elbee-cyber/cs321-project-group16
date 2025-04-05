@@ -133,6 +133,7 @@ public class LoginScreen extends Application {
 
         Scene scene = new Scene(grid, 400, 220);
         primaryStage.setScene(scene);
+        primaryStage.centerOnScreen();
         primaryStage.show();
     }
 
