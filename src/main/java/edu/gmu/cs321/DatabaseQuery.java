@@ -11,7 +11,7 @@ import java.sql.SQLException;
 public class DatabaseQuery {
     private final String url = "jdbc:mysql://localhost:3306/cs321";
     private final String user = "root";
-    private final String pass = "elbee";
+    private final String pass = "Quang$2001";
     private Connection connection;
 
     public Connection connect() throws SQLException {

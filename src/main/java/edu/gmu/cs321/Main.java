@@ -1,6 +1,6 @@
 package edu.gmu.cs321;
 
-import edu.gmu.cs321.Reviewer.LoginScreen; 
+import edu.gmu.cs321.DataEntry.LoginScreen; 
 
 public class Main {
     public static void main(String[] args) {
