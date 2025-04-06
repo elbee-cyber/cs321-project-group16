@@ -35,7 +35,7 @@ public class Entry extends Application {
         GridPane grid = new GridPane();
 
         // gridpane layout       
-        grid.setAlignment(Pos.TOP_LEFT);
+        grid.setAlignment(Pos.CENTER);
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setPadding(new Insets(25));
@@ -58,7 +58,7 @@ public class Entry extends Application {
         
 
         //record ID
-        Shape rectangle = new Rectangle(500, 50);
+        Shape rectangle = new Rectangle(600, 50);
         rectangle.setFill(Color.LIGHTGRAY);
         grid.add(rectangle, 0, 0, 6, 1);
         Text recordID = new Text(" [Record ID]");
@@ -81,12 +81,14 @@ public class Entry extends Application {
 
         //name
         Label nameLabel = new Label("Name:");
+        nameLabel.setAlignment(Pos.CENTER_RIGHT);
         grid.add(nameLabel, 0, 1);
         TextField nameTextField = new TextField();
         grid.add(nameTextField, 1, 1, 2, 1);
 
         //address
         Label addressLabel = new Label("Address:");
+        addressLabel.setAlignment(Pos.CENTER_RIGHT);
         grid.add(addressLabel, 0, 2);
         TextField addressFieldOne = new TextField();
         addressFieldOne.setPromptText("Address Line 1");
@@ -106,6 +108,7 @@ public class Entry extends Application {
 
         //ssn
         Label ssnLabel = new Label("SSN:");
+        ssnLabel.setAlignment(Pos.CENTER_RIGHT);
         grid.add(ssnLabel, 3, 1);
         TextField ssnField = new TextField();
         ssnField.setPromptText("xxx-xx-xxxx");
@@ -113,6 +116,7 @@ public class Entry extends Application {
 
         //phone number
         Label phoneLabel = new Label("Phone Number:");
+        phoneLabel.setAlignment(Pos.CENTER_RIGHT);
         grid.add(phoneLabel, 3, 2);
         TextField phoneField = new TextField();
         phoneField.setPromptText("xxx-xxx-xxxx");
@@ -120,12 +124,14 @@ public class Entry extends Application {
 
         //email
         Label emailLabel = new Label("Email:");
+        emailLabel.setAlignment(Pos.CENTER_RIGHT);
         grid.add(emailLabel, 3, 3);
         TextField emailField = new TextField();
         grid.add(emailField, 4, 3, 2, 1);
 
         //deceased name
         Label deceasedName = new Label("Name of Deceased:");
+        deceasedName.setAlignment(Pos.CENTER_RIGHT);
         deceasedName.setWrapText(true);
         grid.add(deceasedName, 0, 8, 2, 1);
         TextField deceasedNameField = new TextField();
@@ -133,6 +139,7 @@ public class Entry extends Application {
 
         //deceased dob
         Label deceasedDOB = new Label("Deceased Date of Birth:");
+        deceasedDOB.setAlignment(Pos.CENTER_RIGHT);
         deceasedDOB.setWrapText(true);
         grid.add(deceasedDOB, 0, 9, 2, 1);
         TextField deceasedDOBField = new TextField();
@@ -141,6 +148,7 @@ public class Entry extends Application {
 
         //deceased ssn
         Label deceasedSSN = new Label("Deceased SSN:");
+        deceasedSSN.setAlignment(Pos.CENTER_RIGHT);
         grid.add(deceasedSSN, 0, 10, 2, 1);
         TextField deceasedSSNField = new TextField();
         deceasedSSNField.setPromptText("xxx-xx-xxxx");
@@ -148,6 +156,7 @@ public class Entry extends Application {
 
         //relationship to requestor
         Label relationshipLabel = new Label("Relationship to Requestor:");
+        relationshipLabel.setAlignment(Pos.CENTER_RIGHT);
         relationshipLabel.setWrapText(true);
         grid.add(relationshipLabel, 3, 8, 2, 1);
         TextField relationshipField = new TextField();
@@ -155,11 +164,14 @@ public class Entry extends Application {
 
         //request reason
         Label requestReasonLabel = new Label("Request Reason:");
+        requestReasonLabel.setAlignment(Pos.TOP_RIGHT);
         grid.add(requestReasonLabel, 0, 11, 2, 1);
         TextField requestReasonField = new TextField();
+        requestReasonField.setPrefHeight(100);
+        requestReasonField.setAlignment(Pos.TOP_LEFT);
         grid.add(requestReasonField, 2, 11, 4, 1);
 
-        Scene scene = new Scene(grid, 800, 600);
+        Scene scene = new Scene(grid, 800, 570);
         primaryStage.setScene(scene);
         primaryStage.show();
     }

@@ -8,6 +8,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
@@ -128,6 +129,13 @@ public class LoginScreen extends Application {
                 dashboard.start(primaryStage);
             } else {
                 actiontarget.setText("Invalid credentials.");
+            }
+        });
+
+        //keyboard event for login button
+        grid.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.ENTER) {
+                loginButton.fire();
             }
         });
 
