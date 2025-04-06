@@ -7,6 +7,8 @@ import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +19,12 @@ import java.util.List;
 public class ApproverDashboard extends Application {
 
     private List<ImmigrationRequest> immigrationRequests;
+    private DatabaseQuery dbQuery;
+
+    // Current user data (passed from login)
+    private Integer currentUserId;
+    private String currentUserRole;
+    private String currentUser;
 
     /**
      * Starts the application and sets up the UI for the Approver Dashboard.
@@ -25,17 +33,23 @@ public class ApproverDashboard extends Application {
      */
     @Override
     public void start(Stage primaryStage) {
-        // Initialize some placeholder immigration requests
+        // Initialize database and lists
+        dbQuery = new DatabaseQuery();
         immigrationRequests = new ArrayList<>();
-        immigrationRequests.add(new ImmigrationRequest("1", "John Doe", "USA", "Jane Doe", true, "Pending", "2025-04-01"));
-        immigrationRequests.add(new ImmigrationRequest("2", "Alice Smith", "Canada", "Bob Smith", true, "Pending", "2025-03-29"));
-        immigrationRequests.add(new ImmigrationRequest("3", "Carlos Lopez", "Mexico", "Maria Lopez", false, "Pending", "2025-04-03"));
+        
+        // Simulate current user info (this could be set dynamically after login)
+        currentUserId = 1; // Placeholder for the logged-in user ID
+        currentUserRole = "approver"; // Placeholder for user role
+        currentUser = "guest"; // Placeholder for the username
 
-        // Create the ListView to display the records
+        // Fetch pending immigration requests for the approver from the database
+        fetchPendingRequests();
+
+        // Create ListView to display the records
         ListView<ImmigrationRequest> recordListView = new ListView<>();
         recordListView.getItems().addAll(immigrationRequests);
 
-        // Set the cell factory to display the key details of each request
+        // Set the cell factory to display details of each request
         recordListView.setCellFactory(new Callback<ListView<ImmigrationRequest>, ListCell<ImmigrationRequest>>() {
             @Override
             public ListCell<ImmigrationRequest> call(ListView<ImmigrationRequest> param) {
@@ -61,8 +75,14 @@ public class ApproverDashboard extends Application {
         approveButton.setOnAction(event -> {
             ImmigrationRequest selectedRecord = recordListView.getSelectionModel().getSelectedItem();
             if (selectedRecord != null) {
-                selectedRecord.setRequestStatus("Approved");
-                showConfirmation("Approved", selectedRecord);
+                try {
+                    // Update status in the database and locally
+                    dbQuery.updateRequestStatus(selectedRecord.getRequestId(), "Approved");
+                    selectedRecord.setRequestStatus("Approved");
+                    showConfirmation("Approved", selectedRecord);
+                } catch (SQLException e) {
+                    showErrorMessage("Error approving the record.");
+                }
             } else {
                 showErrorMessage("Please select a record to approve.");
             }
@@ -72,7 +92,14 @@ public class ApproverDashboard extends Application {
         rejectButton.setOnAction(event -> {
             ImmigrationRequest selectedRecord = recordListView.getSelectionModel().getSelectedItem();
             if (selectedRecord != null) {
-                showRejectionDialog(selectedRecord);
+                try {
+                    // Update status in the database and locally
+                    dbQuery.updateRequestStatus(selectedRecord.getRequestId(), "Rejected");
+                    selectedRecord.setRequestStatus("Rejected");
+                    showConfirmation("Rejected", selectedRecord);
+                } catch (SQLException e) {
+                    showErrorMessage("Error rejecting the record.");
+                }
             } else {
                 showErrorMessage("Please select a record to reject.");
             }
@@ -91,6 +118,30 @@ public class ApproverDashboard extends Application {
     }
 
     /**
+     * Fetches pending immigration requests from the database for the approver.
+     */
+    private void fetchPendingRequests() {
+        try {
+            dbQuery.connect();
+            ResultSet resultSet = dbQuery.getAllImmigrationRequests();
+            while (resultSet.next()) {
+                immigrationRequests.add(new ImmigrationRequest(
+                        resultSet.getInt("request_id"),
+                        resultSet.getString("form_id"),
+                        resultSet.getString("requestor_name"),
+                        resultSet.getString("requestor_citizenship"),
+                        resultSet.getString("deceased_person_name"),
+                        resultSet.getBoolean("is_legible"),
+                        resultSet.getString("request_status"),
+                        resultSet.getString("submission_date")
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * Displays a confirmation dialog when a record is approved or rejected.
      *
      * @param action the action taken (approved or rejected)
@@ -102,23 +153,6 @@ public class ApproverDashboard extends Application {
         alert.setHeaderText(null);
         alert.setContentText("Request ID " + record.getFormID() + " has been " + action.toLowerCase() + ".");
         alert.showAndWait();
-    }
-
-    /**
-     * Displays a dialog to capture the rejection reason.
-     *
-     * @param record the record being rejected
-     */
-    private void showRejectionDialog(ImmigrationRequest record) {
-        TextInputDialog rejectionDialog = new TextInputDialog();
-        rejectionDialog.setTitle("Rejection Reason");
-        rejectionDialog.setHeaderText("Please provide a reason for rejection.");
-        rejectionDialog.setContentText("Reason:");
-
-        rejectionDialog.showAndWait().ifPresent(reason -> {
-            record.setRequestStatus("Rejected");
-            showConfirmation("Rejected", record);
-        });
     }
 
     /**
@@ -134,11 +168,6 @@ public class ApproverDashboard extends Application {
         alert.showAndWait();
     }
 
-    /**
-     * The main entry point for launching the application.
-     *
-     * @param args command-line arguments
-     */
     public static void main(String[] args) {
         launch(args);
     }
