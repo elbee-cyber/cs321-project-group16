@@ -16,17 +16,30 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
 
+// This class represents the main entry form for data entry, allowing users to input and manage data related to deceased individuals.
 public class Entry extends Application {
     String username;
     String role;
     DatabaseQuery db;
 
+    /**
+     * Constructor to initialize the Entry object with the username and role of the user.
+     * 
+     * @param username The username of the user
+     * @param role The role of the user (e.g., admin, user)
+     * @param db The database query object to interact with the database
+     */
     public Entry(String username, String role) {
         this.username = username;
         this.role = role;
         this.db = new DatabaseQuery();
     }
 
+    /**
+     * Method to start the JavaFX application and set up the main entry form UI.
+     * 
+     * @param primaryStage the primary stage for this application
+     */
     @Override
     public void start(Stage primaryStage) {
         primaryStage.setTitle("Data Entry");
@@ -176,6 +189,11 @@ public class Entry extends Application {
         primaryStage.show();
     }
 
+    /**
+     * Main method to launch the JavaFX application.
+     * 
+     * @param args command line arguments
+     */
     public static void main(String[] args) {
         launch(args);
     }

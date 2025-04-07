@@ -1,16 +1,13 @@
 package edu.gmu.cs321;
 
-/**
- * This class represents a DeceasedImmigrant domain object that extends the 
- * Person class.
- * It contains the necessary details such as immigrant ID and country of origin.
- */
+//This class represents a DeceasedImmigrant domain object that extends the Person class.
 public class DeceasedImmigrant extends Person { //Person class to be implemented
     private int immigrantID;
     private String countryOfOrigin;
 
     /**
      * Constructor to initialize a DeceasedImmigrant object with necessary details.
+     * 
      * @param firstName
      * @param lastName
      * @param email
@@ -45,6 +42,7 @@ public class DeceasedImmigrant extends Person { //Person class to be implemented
      * Setter for immigrantID
      * 
      * @param ID number of the deceased immigrant.
+     * @throws IllegalArgumentException if immigrantID is less than 0
      */
     public void setImmigrantID(int immigrantID) {
         if (immigrantID < 0) {
@@ -66,6 +64,7 @@ public class DeceasedImmigrant extends Person { //Person class to be implemented
      * Setter for countryOfOrigin
      * 
      * @param the deceased immigrant's country of origin
+     * @throws IllegalArgumentException if countryOfOrigin is null
      */
     public void setCountryOfOrigin(String countryOfOrigin) {
         if (countryOfOrigin == null) {

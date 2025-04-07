@@ -17,10 +17,16 @@ import javafx.geometry.*;
 import javafx.scene.control.Hyperlink;
 import javafx.event.ActionEvent;
 
+// This class represents the login screen for the data entry application, allowing users to enter their credentials and access the system.
 public class LoginScreen extends Application {
     
     String selectedRole = "";
 
+    /**
+     * Method to start the JavaFX application and set up the login screen UI.
+     * 
+     * @param primaryStage the primary stage for this application
+     */
     @Override
     public void start(Stage primaryStage) {
 
@@ -33,24 +39,26 @@ public class LoginScreen extends Application {
         grid.setVgap(10);
         grid.setPadding(new Insets(25, 25, 25, 25));
 
+        // welcome header
         Text header = new Text("Welcome to Data Entry");
         header.setFont(Font.font("Verdana", FontWeight.NORMAL, 20));
         grid.add(header, 0, 0, 2, 1);
 
+        // username
         Label userName = new Label("User Name:");
         userName.setFont(Font.font("Verdana", FontWeight.NORMAL, 15));
         grid.add(userName, 0, 2);
-
         TextField userTextField = new TextField();
         grid.add(userTextField, 1, 2);
 
+        // password
         Label pw = new Label("Password:");
         pw.setFont(Font.font("Verdana", FontWeight.NORMAL, 15));
         grid.add(pw, 0, 3);
-
         PasswordField pwBox = new PasswordField();
         grid.add(pwBox, 1, 3);
 
+        //login button
         Button loginButton = new Button("Sign in");
         HBox hbBtn = new HBox(10);
         hbBtn.setAlignment(Pos.BOTTOM_RIGHT);
@@ -94,11 +102,18 @@ public class LoginScreen extends Application {
                 } else {
                     reminderText.setText("No password found for this user/role combination.");
                 }
-                Button okButton = new Button("OK");
+            });
+            remindUserText.setOnAction(event -> {
+                if (remindUserText.getText().equals("admin") && roles.getValue().equals("Data Entry")) {
+                    reminderText.setText("Your password is: data");
+                } else {
+                    reminderText.setText("No password found for this user/role combination.");
+                }
+            });
+            Button okButton = new Button("OK");
                 okButton.setOnAction(event1 -> passwordStage.close());
                 passwordGrid.add(okButton, 1, 3);
                 GridPane.setHalignment(okButton, HPos.RIGHT);
-            });
 
             Scene passwordReminder = new Scene(passwordGrid, 300, 200);
             passwordStage.setScene(passwordReminder);
@@ -106,18 +121,21 @@ public class LoginScreen extends Application {
         });
         grid.add(forgotPassword, 0, 4);
 
+        //default login tooltip
         Label defaultLogin = new Label("Default Login: admin/data");
         defaultLogin.setFont(Font.font("Verdana", FontWeight.NORMAL, 12));
         grid.add(defaultLogin, 1, 5);
 
+        //login success/failure message
         final Text actiontarget = new Text();
         grid.add(actiontarget, 0, 6);
-        grid.setColumnSpan(actiontarget, 2);
-        grid.setHalignment(actiontarget, HPos.RIGHT);
+        GridPane.setColumnSpan(actiontarget, 2);
+        GridPane.setHalignment(actiontarget, HPos.RIGHT);
         actiontarget.setId("actiontarget");
         actiontarget.setFill(Color.FIREBRICK);
         actiontarget.setFont(Font.font("Verdana", FontWeight.NORMAL, 15));
 
+        //functionality for login button
         loginButton.setOnAction(e -> {
             // Add your login logic here
             String username = userTextField.getText();
@@ -132,19 +150,25 @@ public class LoginScreen extends Application {
             }
         });
 
-        //keyboard event for login button
+        //keyboard event for login button (ENTER key)
         grid.setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.ENTER) {
                 loginButton.fire();
             }
         });
 
+        //initialize the screen
         Scene scene = new Scene(grid, 400, 220);
         primaryStage.setScene(scene);
         primaryStage.centerOnScreen();
         primaryStage.show();
     }
 
+    /**
+     * Main method to launch the JavaFX application.
+     * 
+     * @param args command line arguments
+     */
     public static void main(String[] args) {
         launch(args);
     }

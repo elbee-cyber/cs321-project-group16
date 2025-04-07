@@ -1,10 +1,7 @@
 package edu.gmu.cs321;
 
-/**
- * This class represents a RequestForm used to submit an immigration request.
- * It contains the necessary details like form ID, requestor's name, citizenship status,
- * deceased person's name, and validation status.
- */
+// This class represents a RequestForm used to submit an immigration request.
+// It contains the necessary details like form ID, requestor's name, citizenship status, deceased person's name, and validation status.
 public class RequestForm {
 
     private String formID;
@@ -46,6 +43,7 @@ public class RequestForm {
      * Setter for formID.
      * 
      * @param formID the formID to set.
+     * @throws IllegalArgumentException if formID is null.
      */
     public void setFormID(String formID) {
         if (formID == null) {
@@ -109,6 +107,7 @@ public class RequestForm {
      * Setter for deceasedPersonName.
      * 
      * @param deceasedPersonName the deceased person's name to set.
+     * @throws IllegalArgumentException if the name is null.
      */
     public void setDeceasedPersonName(String deceasedPersonName) {
         if (deceasedPersonName == null) {

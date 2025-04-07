@@ -1,21 +1,42 @@
 package edu.gmu.cs321;
 
+// This class represents an ImmigrationRequest form, extending the RequestForm class.
 public class ImmigrationRequest extends RequestForm {
     private String requestStatus;
     private String submissionDate;
 
+    /**
+     * Constructor to initialize an ImmigrationRequest object with necessary details.
+     * 
+     * @param formID            Unique identifier for the form.
+     * @param requestorName     Name of the person requesting the form.
+     * @param requestorCitizenship Citizenship status of the requestor.
+     * @param deceasedPersonName Name of the deceased person.
+     * @param isLegible         Indicates if the form is legible.
+     * @param requestStatus     Status of the request (e.g., pending, approved).
+     * @param submissionDate    Date of submission of the request.
+     */
     public ImmigrationRequest(String formID, String requestorName, String requestorCitizenship, String deceasedPersonName, boolean isLegible, String requestStatus, String submissionDate) {
         super(formID, requestorName, requestorCitizenship, deceasedPersonName, isLegible);
         this.requestStatus = requestStatus;
         this.submissionDate = submissionDate;
     }
 
-    // Getter for requestStatus
+    /**
+     * Getter for requestStatus
+     * 
+     * @return the status of the request
+     */
     public String getRequestStatus() {
         return requestStatus;
     }
 
-    // Setter for requestStatus
+    /**
+     * Setter for requestStatus
+     * 
+     * @throws IllegalArgumentException if requestStatus is null
+     * @param requestStatus the status of the request
+     */
     public void setRequestStatus(String requestStatus) {
         if (requestStatus == null) {
             throw new IllegalArgumentException();
@@ -23,12 +44,21 @@ public class ImmigrationRequest extends RequestForm {
         this.requestStatus = requestStatus;
     }
 
-    // Getter for submissionDate
+    /**
+     * Getter for submissionDate
+     * 
+     * @return the date of submission of the request
+     */
     public String getSubmissionDate() {
         return submissionDate;
     }
 
-    // Setter for submissionDate
+    /**
+     * Setter for submissionDate
+     * 
+     * @throws IllegalArgumentException if submissionDate is null
+     * @param submissionDate the date of submission of the request
+     */
     public void setSubmissionDate(String submissionDate) {
         if (submissionDate == null) {
             throw new IllegalArgumentException();
