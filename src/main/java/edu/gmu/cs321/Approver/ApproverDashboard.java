@@ -11,6 +11,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import edu.gmu.cs321.DatabaseQuery;
+import edu.gmu.cs321.ImmigrationRequest;
+
 
 /**
  * This class represents the Approver Dashboard where an approver can view records,

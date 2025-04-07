@@ -1,6 +1,7 @@
 package edu.gmu.cs321;
 
-import edu.gmu.cs321.DataEntry.LoginScreen; 
+//import edu.gmu.cs321.DataEntry.LoginScreen;
+import edu.gmu.cs321.Approver.LoginScreen;
 
 // This is the main class for the application. It serves as the entry point for the JavaFX application.
 public class Main {
