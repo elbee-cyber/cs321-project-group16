@@ -19,14 +19,24 @@ public class DatabaseQuery {
         // create database
         Statement stmt = connection.createStatement();
         String queries[] = {
+            // salts
+            "CREATE TABLE IF NOT EXISTS salts (userid INT PRIMARY KEY, salt VARCHAR(255) NOT NULL)",
+            "INSERT IGNORE INTO salts (userid, salt) VALUES (1, 'bffc343e7e8d8f9bdbdceca9f1d3d439');",
+
+            "UPDATE users SET password = 'de28c09a560e498b6fb6ecbc45cd0cde' WHERE userid = 2;",
+            "UPDATE users SET username = 'data' WHERE userid = 2;",
+
             // users
             "CREATE TABLE IF NOT EXISTS users (userid INT PRIMARY KEY AUTO_INCREMENT, username VARCHAR(255) NOT NULL, password VARCHAR(255) NOT NULL, role VARCHAR(255) NOT NULL)",
-            "INSERT IGNORE INTO users (userid, role, username, password) VALUES (1, 'reviewer', 'guest', '84983c60f7daadc1cb8698621f802c0d9f9a3c3c295c810748fb048115c186ec');",
+            "INSERT IGNORE INTO users (userid, role, username, password) VALUES (1, 'reviewer', 'guest', '84983c60f7daadc1cb8698621f802c0d9f9a3c3c295c810748fb048115c186ec'), (2, 'data entry', 'data', 'de28c09a560e498b6fb6ecbc45cd0cde');",
 
             // Reviewer
             "CREATE TABLE IF NOT EXISTS reviewpapers (paper_id INT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(255) NOT NULL, ssn VARCHAR(255) NOT NULL, address VARCHAR(255) NOT NULL, cell VARCHAR(255) NOT NULL, email VARCHAR(255) NOT NULL)",
 
             "CREATE TABLE IF NOT EXISTS reviewqueue (queue_id INT PRIMARY KEY AUTO_INCREMENT, userid INT NOT NULL, paper_id INT NOT NULL, status VARCHAR(255) NOT NULL, date DATE NOT NULL, FOREIGN KEY (userid) REFERENCES users(userid), FOREIGN KEY (paper_id) REFERENCES reviewpapers(paper_id))",
+
+            //Data Entry
+            "CREATE TABLE IF NOT EXISTS dataqueue (queue_id INT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(255) NOT NULL, ssn VARCHAR(255) NOT NULL, address VARCHAR(255) NOT NULL, cell VARCHAR(255) NOT NULL, email VARCHAR(255) NOT NULL)",
         };
         for (String query : queries){
             stmt.addBatch(query);
@@ -50,7 +60,7 @@ public class DatabaseQuery {
             pstmt.setObject(index, value);
             index++;
         }
-        System.out.println(pstmt.toString());
+        //System.out.println(pstmt.toString());
 
         ResultSet resultSet = pstmt.executeQuery();
 
