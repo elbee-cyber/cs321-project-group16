@@ -1,11 +1,18 @@
 package edu.gmu.cs321.DataEntry;
 
 import javafx.stage.Stage;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 import edu.gmu.cs321.DatabaseQuery;
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.geometry.Insets;
@@ -54,16 +61,37 @@ public class DataDashboard extends Application {
         header.setAlignment(Pos.CENTER);
         header.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #333;");
         grid.add(header, 0, 0);
+
+        ListView<Entry> queue = new ListView<>();
+        ObservableList<Entry> entries = FXCollections.observableArrayList();
+
+        // Populate the ListView with data from the database
+        try {
+            db.connect();
+            String query = "SELECT * FROM dataqueue";
+            ResultSet rs = db.executeQuery(query);
+            while (rs.next()) {
+                String requestID = rs.getString("requestID");
+                String requestorName = rs.getString("requestorName");
+                String requestStatus = rs.getString("requestStatus");
+
+                Entry entry = new Entry(requestID, requestorName, requestStatus);
+                entries.add(entry);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        queue.setItems(entries);
+        grid.add(queue, 0, 1, 3, 1);
         
-        Button openEntryButton = new Button("Open Entry Form");
-        openEntryButton.setOnAction(e -> {
-            Entry entryForm = new Entry(username, role);
+        queue.setOnMouseClicked(e -> {
+            Entry entryForm = queue.getSelectionModel().getSelectedItem();
+            if (entryForm == null) {
+                return; // No entry selected, do nothing
+            }
             entryForm.start(new Stage());
         });
-        HBox openEntryButtonBox = new HBox(10);
-        openEntryButtonBox.setAlignment(Pos.CENTER);
-        openEntryButtonBox.getChildren().add(openEntryButton);
-        grid.add(openEntryButtonBox, 0, 1);
 
         Button logout = new Button("Logout");
         logout.setOnAction(e -> {
@@ -78,7 +106,7 @@ public class DataDashboard extends Application {
         HBox logoutButtonBox = new HBox(10);
         logoutButtonBox.setAlignment(Pos.CENTER);
         logoutButtonBox.getChildren().add(logout);
-        grid.add(logoutButtonBox, 0, 2);
+        grid.add(logoutButtonBox, 2, 0);
 
         Scene scene = new Scene(grid, 800, 600);
         primaryStage.setScene(scene);

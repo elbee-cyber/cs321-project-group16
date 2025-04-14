@@ -18,20 +18,23 @@ import javafx.scene.shape.Shape;
 
 // This class represents the main entry form for data entry, allowing users to input and manage data related to deceased individuals.
 public class Entry extends Application {
-    String username;
-    String role;
+    String requestID;
+    String requestorName;
+    String requestStatus;
     DatabaseQuery db;
 
     /**
      * Constructor to initialize the Entry object with the username and role of the user.
      * 
-     * @param username The username of the user
-     * @param role The role of the user (e.g., admin, user)
+     * @param requestID The ID of the request
+     * @param requestorName The name of the requestor
+     * @param requestStatus The status of the request
      * @param db The database query object to interact with the database
      */
-    public Entry(String username, String role) {
-        this.username = username;
-        this.role = role;
+    public Entry(String requestID, String requestorName, String requestStatus) {
+        this.requestID = requestID;
+        this.requestorName = requestorName;
+        this.requestStatus = requestStatus;
         this.db = new DatabaseQuery();
     }
 
@@ -187,6 +190,11 @@ public class Entry extends Application {
         Scene scene = new Scene(grid, 800, 570);
         primaryStage.setScene(scene);
         primaryStage.show();
+    }
+    
+    @Override
+    public String toString() {
+        return "[Request " + requestID + "] "+ requestorName +" (" + requestStatus + "}";
     }
 
     /**

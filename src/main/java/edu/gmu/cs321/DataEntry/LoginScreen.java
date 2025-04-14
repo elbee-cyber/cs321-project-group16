@@ -2,7 +2,6 @@ package edu.gmu.cs321.DataEntry;
 
 import javafx.stage.Stage;
 
-import java.security.SecureRandom;
 import java.security.spec.KeySpec;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -16,7 +15,7 @@ import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
+//import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
@@ -209,7 +208,6 @@ public class LoginScreen extends Application {
             String password = pwBox.getText();
 
             String hash = hashPassword(password);
-            System.out.println("Hashed Password: " + hash);
 
             try {
                 String query = "SELECT * FROM users WHERE username = ? AND password = ?";

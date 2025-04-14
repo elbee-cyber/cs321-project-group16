@@ -1,6 +1,5 @@
 package edu.gmu.cs321;
 
-import edu.gmu.cs321.Approver.LoginScreen;
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
