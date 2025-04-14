@@ -60,4 +60,17 @@ public class DatabaseQuery {
     public int executeUpdate(String query, Object... parameters) throws SQLException {
         return 0;
     }
+
+    public void updateRequestStatus(String requestID, String status) throws SQLException {
+        String query = "UPDATE reviewqueue SET status = ? WHERE queue_id = ?";
+        PreparedStatement pstmt = connection.prepareStatement(query);
+        pstmt.setString(1, status);
+        pstmt.setString(2, requestID);
+        pstmt.executeUpdate();
+    }
+
+    public ResultSet getAllImmigrationRequests() throws SQLException {
+        String query = "SELECT * FROM reviewpapers";
+        return executeQuery(query);
+    }
 }

@@ -2,6 +2,7 @@ package edu.gmu.cs321.DataEntry;
 
 import javafx.stage.Stage;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -170,6 +171,10 @@ public class LoginScreen extends Application {
      * @param args command line arguments
      */
     public static void main(String[] args) {
-        launch(args);
+        Platform.runLater(() -> {
+            LoginScreen loginScreen = new LoginScreen();
+            Stage primaryStage = new Stage();
+            loginScreen.start(primaryStage);
+        });
     }
 }

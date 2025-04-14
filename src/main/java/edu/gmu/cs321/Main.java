@@ -1,9 +1,11 @@
 package edu.gmu.cs321;
 
-//import edu.gmu.cs321.DataEntry.LoginScreen;
+import edu.gmu.cs321.Approver.LoginScreen;
 import javafx.application.Application;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -19,19 +21,25 @@ public class Main extends Application {
     public void start(Stage primaryStage) {
         primaryStage.setTitle("Role Selection");
 
+        Label heading = new Label("Select Your Role:");
+        heading.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-padding: 10px;");
+
         // Create buttons for each role
         Button approverButton = new Button("Approver");
         Button dataEntryButton = new Button("Data Entry");
         Button reviewerButton = new Button("Reviewer");
 
         // Set button actions
-        approverButton.setOnAction(e -> edu.gmu.cs321.Approver.LoginScreen.main(new String[]{}));
+        approverButton.setOnAction(e -> LoginScreen.main(new String[]{}));
         dataEntryButton.setOnAction(e -> edu.gmu.cs321.DataEntry.LoginScreen.main(new String[]{}));
         reviewerButton.setOnAction(e -> edu.gmu.cs321.Reviewer.LoginScreen.main(new String[]{}));
 
         // Add buttons to a vertical layout
         VBox layout = new VBox(10);
+        layout.getChildren().add(heading);
         layout.getChildren().addAll(approverButton, dataEntryButton, reviewerButton);
+        layout.setAlignment(Pos.CENTER);
+        layout.setStyle("-fx-padding: 20px; -fx-background-color: #f0f0f0;");
 
         // Set the scene and show the stage
         Scene scene = new Scene(layout, 300, 200);

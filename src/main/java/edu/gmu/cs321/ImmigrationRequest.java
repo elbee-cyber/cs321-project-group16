@@ -8,7 +8,7 @@ public class ImmigrationRequest extends RequestForm {
     /**
      * Constructor to initialize an ImmigrationRequest object with necessary details.
      * 
-     * @param formID            Unique identifier for the form.
+     * @param requestID            Unique identifier for the form.
      * @param requestorName     Name of the person requesting the form.
      * @param requestorCitizenship Citizenship status of the requestor.
      * @param deceasedPersonName Name of the deceased person.
@@ -16,10 +16,19 @@ public class ImmigrationRequest extends RequestForm {
      * @param requestStatus     Status of the request (e.g., pending, approved).
      * @param submissionDate    Date of submission of the request.
      */
-    public ImmigrationRequest(String formID, String requestorName, String requestorCitizenship, String deceasedPersonName, boolean isLegible, String requestStatus, String submissionDate) {
-        super(formID, requestorName, requestorCitizenship, deceasedPersonName, isLegible);
+    public ImmigrationRequest(String requestID, String requestorName, String requestorCitizenship, String deceasedPersonName, boolean isLegible, String requestStatus, String submissionDate) {
+        super(requestID, requestorName, requestorCitizenship, deceasedPersonName, isLegible);
         this.requestStatus = requestStatus;
         this.submissionDate = submissionDate;
+    }
+
+    /**
+     * Getter for requestID
+     * 
+     * @return the unique identifier for the form
+     */
+    public String getRequestID() {
+        return super.getFormID();
     }
 
     /**
