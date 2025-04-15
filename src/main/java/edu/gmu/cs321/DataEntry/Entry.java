@@ -20,7 +20,10 @@ import javafx.scene.shape.Shape;
 public class Entry extends Application {
     String requestID;
     String requestorName;
+    String requestorCitizenship;
+    String deceasedName;
     String requestStatus;
+    String submissionDate;
     DatabaseQuery db;
 
     /**
@@ -31,10 +34,13 @@ public class Entry extends Application {
      * @param requestStatus The status of the request
      * @param db The database query object to interact with the database
      */
-    public Entry(String requestID, String requestorName, String requestStatus) {
+    public Entry(String requestID, String requestorName, String requestorCitizenship, String deceasedName, String requestStatus, String submissionDate) {
         this.requestID = requestID;
         this.requestorName = requestorName;
+        this.requestorCitizenship = requestorCitizenship;
+        this.deceasedName = deceasedName;
         this.requestStatus = requestStatus;
+        this.submissionDate = submissionDate;
         this.db = new DatabaseQuery();
     }
 
@@ -77,7 +83,7 @@ public class Entry extends Application {
         Shape rectangle = new Rectangle(600, 50);
         rectangle.setFill(Color.LIGHTGRAY);
         grid.add(rectangle, 0, 0, 6, 1);
-        Text recordID = new Text(" [Record ID]");
+        Text recordID = new Text(" [Record ID] " + requestID);
         recordID.setFont(Font.font("Verdana", FontWeight.BOLD, 25));
         grid.add(recordID, 0, 0, 4, 1);
 
@@ -100,6 +106,7 @@ public class Entry extends Application {
         nameLabel.setAlignment(Pos.CENTER_RIGHT);
         grid.add(nameLabel, 0, 1);
         TextField nameTextField = new TextField();
+        nameTextField.setText(requestorName);
         grid.add(nameTextField, 1, 1, 2, 1);
 
         //address
@@ -151,6 +158,7 @@ public class Entry extends Application {
         deceasedName.setWrapText(true);
         grid.add(deceasedName, 0, 8, 2, 1);
         TextField deceasedNameField = new TextField();
+        deceasedNameField.setText(this.deceasedName);
         grid.add(deceasedNameField, 2, 8, 1, 1);
 
         //deceased dob
@@ -192,6 +200,60 @@ public class Entry extends Application {
         primaryStage.show();
     }
     
+    /**
+     * Method to get the request ID.
+     * 
+     * @return the request ID
+     */
+    public String getRequestID() {
+        return requestID;
+    }
+
+    /**
+     * Method to get the requestor name.
+     * 
+     * @return the requestor name
+     */
+    public String getRequestorName() {
+        return requestorName;
+    }
+
+    /**
+     * Method to get the requestor citizenship.
+     * 
+     * @return the requestor citizenship
+     */
+    public String getRequestorCitizenship() {
+        return requestorCitizenship;
+    }
+
+    /**
+     * Method to get the deceased name.
+     * 
+     * @return the deceased name
+     */
+    public String getDeceasedName() {
+        return deceasedName;
+    }
+
+    /**
+     * Method to get the request status.
+     * 
+     * @return the request status
+     */
+    public String getRequestStatus() {
+        return requestStatus;
+    }
+
+    /**
+     * Method to get the submission date.
+     * 
+     * @return the submission date
+     */
+    public String getSubmissionDate() {
+        return submissionDate;
+    }
+
     @Override
     public String toString() {
         return "[Request " + requestID + "] "+ requestorName +" (" + requestStatus + "}";
