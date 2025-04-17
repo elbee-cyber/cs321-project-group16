@@ -19,7 +19,7 @@ public class Main extends Application {
      */
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("Role Selection");
+        primaryStage.setTitle("Genealogy Records Request System");
 
         // Create a label for the heading and instructions
         Label heading = new Label("Genealogy Records Request");
