@@ -1,5 +1,7 @@
 package edu.gmu.cs321.Reviewer;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.sql.ResultSet;
 
 import edu.gmu.cs321.DatabaseQuery;
@@ -81,8 +83,8 @@ public class LoginScreen extends Application {
 
             // try to hash the input password
             try {
-                java.security.MessageDigest digest = java.security.MessageDigest.getInstance("SHA-256");
-                byte[] hash = digest.digest(password.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                MessageDigest digest = MessageDigest.getInstance("SHA-256");
+                byte[] hash = digest.digest(password.getBytes(StandardCharsets.UTF_8));
                 hashedPassword = "";
                 for (byte b : hash) {
                     hashedPassword += String.format("%02x", b);

@@ -89,8 +89,8 @@ public class DatabaseQuery {
             "INSERT IGNORE INTO reviewqueue (queue_id, paper_id, status, date) VALUES (12, 12, 'unreviewed', '2023-01-12')",
             "INSERT IGNORE INTO reviewqueue (queue_id, paper_id, status, date) VALUES (13, 13, 'unreviewed', '2023-01-13')",
             "INSERT IGNORE INTO reviewqueue (queue_id, paper_id, status, date) VALUES (14, 14, 'unreviewed', '2023-01-14')",
-            "INSERT IGNORE INTO reviewqueue (queue_id, paper_id, status, date) VALUES (15, 15, 'reviewed', '2023-01-15')",
-            "INSERT IGNORE INTO reviewqueue (queue_id, paper_id, status, date) VALUES (16, 16, 'reviewed', '2023-01-16')"
+            "INSERT IGNORE INTO reviewqueue (queue_id, paper_id, status, date) VALUES (15, 15, 'forwarded', '2023-01-15')",
+            "INSERT IGNORE INTO reviewqueue (queue_id, paper_id, status, date) VALUES (16, 16, 'forwarded', '2023-01-16')"
         };
         for (String query : queries){
             stmt.addBatch(query);

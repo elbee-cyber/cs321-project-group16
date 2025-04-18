@@ -7,6 +7,8 @@ import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
@@ -49,25 +51,42 @@ public class Dashboard {
     private String topbarSortStatus = "status = 'unreviewed'";
 
     // Topbar buttons
-    Button leftArrowButton = new Button("<");
-    Button rightArrowButton = new Button(">");
-    ComboBox<String> dateFilter = new ComboBox<>();
-    ComboBox<String> statusFilter = new ComboBox<>();
+    private Button leftArrowButton = new Button("<");
+    private Button rightArrowButton = new Button(">");
+    private ComboBox<String> dateFilter = new ComboBox<>();
+    private ComboBox<String> statusFilter = new ComboBox<>();
 
     // Form view items
-    TextField nameField = new TextField("Placeholder");
-    TextArea addressArea = new TextArea("Placeholder");
-    TextField ssnField = new TextField("Placeholder");
-    TextField cellField = new TextField("Placeholder");
-    TextField emailField = new TextField("Placeholder");
-    TextField deceasedNameField = new TextField("Placeholder");
-    TextField deceasedDOBField = new TextField("Placeholder");
-    TextField deceasedSSNField = new TextField("Placeholder");
-    TextField deceasedRelaField = new TextField("Placeholder");
-    TextArea reasonReqArea = new TextArea("Placeholder");
+    private TextField nameField = new TextField("Placeholder");
+    private TextArea addressArea = new TextArea("Placeholder");
+    private TextField ssnField = new TextField("Placeholder");
+    private TextField cellField = new TextField("Placeholder");
+    private TextField emailField = new TextField("Placeholder");
+    private TextField deceasedNameField = new TextField("Placeholder");
+    private TextField deceasedDOBField = new TextField("Placeholder");
+    private TextField deceasedSSNField = new TextField("Placeholder");
+    private TextField deceasedRelaField = new TextField("Placeholder");
+    private TextArea reasonReqArea = new TextArea("Placeholder");
 
-    // Comments area
-    TextArea commentsArea = new TextArea();
+    // Global UI elements
+    private TextArea commentsArea = new TextArea();
+    private Button approveButton = new Button("Forward to Approval");
+    Label paperidLabel = new Label();
+
+    // Review checkboxes for each field
+    private CheckBox nameCheckBox = new CheckBox();
+    private CheckBox addressCheckBox = new CheckBox();
+    private CheckBox ssnCheckBox = new CheckBox();
+    private CheckBox cellCheckBox = new CheckBox();
+    private CheckBox emailCheckBox = new CheckBox();
+    private CheckBox deceasedNameCheckBox = new CheckBox();
+    private CheckBox deceasedDOBCheckBox = new CheckBox();
+    private CheckBox deceasedSSNCheckBox = new CheckBox();
+    private CheckBox deceasedRelaCheckBox = new CheckBox();
+    private CheckBox reasonReqCheckBox = new CheckBox();
+
+    // Keeps track of number of checked items
+    private int checkedCount = 0;
 
     /**
      * Constructor for the Dashboard class.
@@ -126,6 +145,7 @@ public class Dashboard {
      *               This will be updated with the new queue data.
      */
     private void updateQueueData(HBox dateBar, Boolean clickedLeft, Boolean clickedRight) {
+        
         String[] queueDates = getQueueData(clickedLeft, clickedRight);
         dateBar.getChildren().clear(); // Clear previous buttons
         int i = 0;
@@ -152,6 +172,22 @@ public class Dashboard {
      * This method is called when a queue item is selected from the top bar.
      */
     private void selectQueueItem() {
+        this.paperidLabel.setText("Reviewing Paper ID: " + this.selectedQueueId + "           ");
+        clearCheckedItems(); // Clear previous selections
+
+        // Update navigation keys if we are resting on a bound
+        int minQueueId = getBoundedQueueId(0);
+        if (this.leftMostItem == minQueueId) {
+            this.leftArrowButton.setDisable(true);
+        } else {
+            this.leftArrowButton.setDisable(false);
+        }
+        int maxQueueId = getBoundedQueueId(1) ;
+        if (this.rightMostItem == maxQueueId) {
+            this.rightArrowButton.setDisable(true);
+        } else {
+            this.rightArrowButton.setDisable(false);
+        }
         try {
             // Query to get the reviewpaper details based on the selected queue item
             String query = "SELECT rp.* FROM reviewpapers rp INNER JOIN reviewqueue rq ON rp.paper_id = rq.paper_id WHERE rq.queue_id = " + this.selectedQueueId;
@@ -180,13 +216,62 @@ public class Dashboard {
     }
 
     /**
+     * Clears the checked items and resets the form fields.
+     */
+    private void clearCheckedItems() {
+        this.nameCheckBox.setSelected(false);
+        this.addressCheckBox.setSelected(false);
+        this.ssnCheckBox.setSelected(false);
+        this.cellCheckBox.setSelected(false);
+        this.emailCheckBox.setSelected(false);
+        this.deceasedNameCheckBox.setSelected(false);
+        this.deceasedDOBCheckBox.setSelected(false);
+        this.deceasedSSNCheckBox.setSelected(false);
+        this.deceasedRelaCheckBox.setSelected(false);
+        this.reasonReqCheckBox.setSelected(false);
+        this.approveButton.setDisable(true);
+        this.checkedCount = 0;
+        this.nameField.setDisable(false);
+        this.addressArea.setDisable(false);
+        this.ssnField.setDisable(false);
+        this.cellField.setDisable(false);
+        this.emailField.setDisable(false);
+        this.deceasedNameField.setDisable(false);
+        this.deceasedDOBField.setDisable(false);
+        this.deceasedSSNField.setDisable(false);
+        this.deceasedRelaField.setDisable(false);
+        this.reasonReqArea.setDisable(false);
+        this.commentsArea.clear();
+    }
+
+    
+    private int getBoundedQueueId(int isMax) {
+        int bound = -1;
+        String query;
+        if (isMax == 1){
+            query = "SELECT MAX(queue_id) AS bound FROM reviewqueue WHERE " + this.topbarSortStatus;
+        }else{
+            query = "SELECT MIN(queue_id) AS bound FROM reviewqueue WHERE " + this.topbarSortStatus;
+        }
+        try {
+            ResultSet rs = db.executeQuery(query);
+            if (rs.next()) {
+                bound = rs.getInt("bound");
+            }
+        } catch (Exception e) {
+            System.out.println("Error retrieving max queue_id: " + e.getMessage());
+        }
+        return bound;
+    }
+
+    /**
      * Starts the Reviewer Dashboard application.
      * @param primaryStage The primary stage for this application.
      */
     public void startScreen(Stage primaryStage) {
         primaryStage.setTitle("Review Dashboard");
 
-        // Create the top bar with user info and logout button
+        // Create the top bar with user+paper info and logout button
         HBox topBar = new HBox();
         Label userLabel = new Label("Reviewer: " + this.currentUser + "   ");
         Button logoutButton = new Button("Logout");
@@ -197,11 +282,14 @@ public class Dashboard {
         });
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-        topBar.getChildren().addAll(spacer, userLabel, logoutButton);
+        topBar.getChildren().addAll(spacer, this.paperidLabel, userLabel, logoutButton);
         topBar.setPadding(new Insets(5));
 
         // Create the date bar with navigation buttons and filters
         HBox dateBar = new HBox(5);
+
+        // Left and right arrow buttons for navigation
+        this.leftArrowButton.setDisable(true); // Disable left arrow initially
         this.leftArrowButton.setOnAction(e -> {
             updateQueueData(dateBar, true, false);
         });
@@ -223,14 +311,16 @@ public class Dashboard {
         });
 
         // Status filter
-        this.statusFilter.getItems().addAll("Reviewed", "Unreviewed", "All");
+        this.statusFilter.getItems().addAll("Unreviewed", "Forwarded", "Rejected", "All");
         this.statusFilter.setValue("Unreviewed");
         this.statusFilter.setOnAction(e -> {
             String selectedFilter = this.statusFilter.getValue();
-            if (selectedFilter.equals("Reviewed")) {
-                this.topbarSortStatus = "status = 'reviewed'";
-            } else if (selectedFilter.equals("Unreviewed")) {
+            if (selectedFilter.equals("Unreviewed")) {
                 this.topbarSortStatus = "status = 'unreviewed'";
+            } else if (selectedFilter.equals("Forwarded")) {
+                this.topbarSortStatus = "status = 'forwarded'";
+            } else if (selectedFilter.equals("Rejected")) {
+                this.topbarSortStatus = "status = 'rejected'";
             } else if (selectedFilter.equals("All")) {
                 this.topbarSortStatus = "1=1"; // no filter
             }
@@ -251,23 +341,94 @@ public class Dashboard {
         personalInfo.setVgap(10);
         personalInfo.setPadding(new Insets(10));
 
+        // Personal information section with checkboxes
         personalInfo.add(new Label("Name:"), 0, 0);
         personalInfo.add(this.nameField, 1, 0);
+        personalInfo.add(this.nameCheckBox, 2, 0);
+        this.nameCheckBox.setOnAction(e -> {
+            if (this.nameCheckBox.isSelected()) {
+                this.nameField.setDisable(true);
+                this.checkedCount++;
+                if (this.checkedCount == 10){
+                    approveButton.setDisable(false);
+                }
+            } else {
+                this.nameField.setDisable(false);
+                this.checkedCount--;
+                approveButton.setDisable(true);
+            }
+        });
 
         personalInfo.add(new Label("Address:"), 0, 1);
         this.addressArea.setPrefRowCount(3);
         personalInfo.add(this.addressArea, 1, 1);
+        personalInfo.add(this.addressCheckBox, 2, 1);
+        this.addressCheckBox.setOnAction(e -> {
+            if (this.addressCheckBox.isSelected()) {
+                this.addressArea.setDisable(true);
+                this.checkedCount++;
+                if (this.checkedCount == 10){
+                    approveButton.setDisable(false);
+                }
+            } else {
+                this.addressArea.setDisable(false);
+                this.checkedCount--;
+                approveButton.setDisable(true);
+            }
+        });
 
-        personalInfo.add(new Label("SSN:"), 2, 0);
-        personalInfo.add(this.ssnField, 3, 0);
+        personalInfo.add(new Label("SSN:"), 3, 0);
+        personalInfo.add(this.ssnField, 4, 0);
+        personalInfo.add(this.ssnCheckBox, 5, 0);
+        this.ssnCheckBox.setOnAction(e -> {
+            if (this.ssnCheckBox.isSelected()) {
+                this.ssnField.setDisable(true);
+                this.checkedCount++;
+                if (this.checkedCount == 10){
+                    approveButton.setDisable(false);
+                }
+            } else {
+                this.ssnField.setDisable(false);
+                this.checkedCount--;
+                approveButton.setDisable(true);
+            }
+        });
 
-        personalInfo.add(new Label("Cell:"), 2, 1);
-        personalInfo.add(this.cellField, 3, 1);
+        personalInfo.add(new Label("Cell:"), 3, 1);
+        personalInfo.add(this.cellField, 4, 1);
+        personalInfo.add(this.cellCheckBox, 5, 1);
+        this.cellCheckBox.setOnAction(e -> {
+            if (this.cellCheckBox.isSelected()) {
+                this.cellField.setDisable(true);
+                this.checkedCount++;
+                if (this.checkedCount == 10){
+                    approveButton.setDisable(false);
+                }
+            } else {
+                this.cellField.setDisable(false);
+                this.checkedCount--;
+                approveButton.setDisable(true);
+            }
+        });
 
-        personalInfo.add(new Label("Email:"), 2, 2);
-        personalInfo.add(this.emailField, 3, 2);
+        personalInfo.add(new Label("Email:"), 3, 2);
+        personalInfo.add(this.emailField, 4, 2);
+        personalInfo.add(this.emailCheckBox, 5, 2);
+        this.emailCheckBox.setOnAction(e -> {
+            if (this.emailCheckBox.isSelected()) {
+                this.emailField.setDisable(true);
+                this.checkedCount++;
+                if (this.checkedCount == 10){
+                    approveButton.setDisable(false);
+                }
+            } else {
+                this.emailField.setDisable(false);
+                this.checkedCount--;
+                approveButton.setDisable(true);
+            }
+        });
 
-        // Deceased information section
+        // Deceased information section with checkboxes
         Label deceasedInfoLabel = new Label("Deceased Information");
         deceasedInfoLabel.setStyle("-fx-font-weight: bold; -fx-padding: 5 0 0 0;");
 
@@ -278,17 +439,73 @@ public class Dashboard {
 
         deceasedInfo.add(new Label("Name of Deceased:"), 0, 0);
         deceasedInfo.add(this.deceasedNameField, 1, 0);
+        deceasedInfo.add(this.deceasedNameCheckBox, 2, 0);
+        this.deceasedNameCheckBox.setOnAction(e -> {
+            if (this.deceasedNameCheckBox.isSelected()) {
+                this.deceasedNameField.setDisable(true);
+                this.checkedCount++;
+                if (this.checkedCount == 10){
+                    approveButton.setDisable(false);
+                }
+            } else {
+                this.deceasedNameField.setDisable(false);
+                this.checkedCount--;
+                approveButton.setDisable(true);
+            }
+        });
 
-        deceasedInfo.add(new Label("Deceased Date of Birth:"), 2, 0);
-        deceasedInfo.add(this.deceasedDOBField, 3, 0);
+        deceasedInfo.add(new Label("Deceased Date of Birth:"), 3, 0);
+        deceasedInfo.add(this.deceasedDOBField, 4, 0);
+        deceasedInfo.add(this.deceasedDOBCheckBox, 5, 0);
+        this.deceasedDOBCheckBox.setOnAction(e -> {
+            if (this.deceasedDOBCheckBox.isSelected()) {
+                this.deceasedDOBField.setDisable(true);
+                this.checkedCount++;
+                if (this.checkedCount == 10){
+                    approveButton.setDisable(false);
+                }
+            } else {
+                this.deceasedDOBField.setDisable(false);
+                this.checkedCount--;
+                approveButton.setDisable(true);
+            }
+        });
 
-        deceasedInfo.add(new Label("Deceased SSN:"), 2, 1);
-        deceasedInfo.add(this.deceasedSSNField, 3, 1);
+        deceasedInfo.add(new Label("Deceased SSN:"), 3, 1);
+        deceasedInfo.add(this.deceasedSSNField, 4, 1);
+        deceasedInfo.add(this.deceasedSSNCheckBox, 5, 1);
+        this.deceasedSSNCheckBox.setOnAction(e -> {
+            if (this.deceasedSSNCheckBox.isSelected()) {
+                this.deceasedSSNField.setDisable(true);
+                this.checkedCount++;
+                if (this.checkedCount == 10){
+                    approveButton.setDisable(false);
+                }
+            } else {
+                this.deceasedSSNField.setDisable(false);
+                this.checkedCount--;
+                approveButton.setDisable(true);
+            }
+        });
 
-        deceasedInfo.add(new Label("Relationship to Requestor:"), 2, 2);
-        deceasedInfo.add(this.deceasedRelaField, 3, 2);
+        deceasedInfo.add(new Label("Relationship to Requestor:"), 3, 2);
+        deceasedInfo.add(this.deceasedRelaField, 4, 2);
+        deceasedInfo.add(this.deceasedRelaCheckBox, 5, 2);
+        this.deceasedRelaCheckBox.setOnAction(e -> {
+            if (this.deceasedRelaCheckBox.isSelected()) {
+                this.deceasedRelaField.setDisable(true);
+                this.checkedCount++;
+                if (this.checkedCount == 10){
+                    approveButton.setDisable(false);
+                }
+            } else {
+                this.deceasedRelaField.setDisable(false);
+                this.checkedCount--;
+                approveButton.setDisable(true);
+            }
+        });
 
-        // Reason for request section
+        // Reason for request section with checkboxes
         Label reasonForRequestLabel = new Label("Reason for Request");
         reasonForRequestLabel.setStyle("-fx-font-weight: bold; -fx-padding: 5 0 0 0;");
         GridPane reasonForRequest = new GridPane();
@@ -298,6 +515,20 @@ public class Dashboard {
         reasonForRequest.add(new Label("Request Reason:"), 0, 0);
         this.reasonReqArea.setPrefRowCount(3);
         reasonForRequest.add(this.reasonReqArea, 1, 1);
+        reasonForRequest.add(this.reasonReqCheckBox, 2, 1);
+        this.reasonReqCheckBox.setOnAction(e -> {
+            if (this.reasonReqCheckBox.isSelected()) {
+                this.reasonReqArea.setDisable(true);
+                this.checkedCount++;
+                if (this.checkedCount == 10){
+                    approveButton.setDisable(false);
+                }
+            } else {
+                this.reasonReqArea.setDisable(false);
+                this.checkedCount--;
+                approveButton.setDisable(true);
+            }
+        });
 
         // Action buttons and comments section
         HBox actions = new HBox(10);
@@ -312,9 +543,8 @@ public class Dashboard {
         bottomSection.setPadding(new Insets(10));
 
         // Approve button remains disabled until all checkmarks are completed
-        Button approveButton = new Button("Forward to Approval");
-        approveButton.setDisable(true);
-        approveButton.setOnAction(e -> {
+        this.approveButton.setDisable(true);
+        this.approveButton.setOnAction(e -> {
             // implement later
         });
 
@@ -352,11 +582,41 @@ public class Dashboard {
                 }
             }
         });
+        this.approveButton.setOnAction(e -> {
+            Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+            confirmAlert.setTitle("Confirmation");
+            confirmAlert.setHeaderText("Forward to Approval");
+            confirmAlert.setContentText("Are you sure you want to forward this paper for approval?");
+
+            confirmAlert.showAndWait().ifPresent(response -> {
+                if (response == ButtonType.OK) {
+                    try {
+                        // Update the selected queue item to have a status of 'Forwarded'
+                        String updateQuery = "UPDATE reviewqueue SET status = 'forwarded' WHERE queue_id = " + this.selectedQueueId;
+                        db.executeUpdate(updateQuery);
+
+                        // Implement logic to update Approval's table here
+
+                        // Show success alert
+                        Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
+                        successAlert.setTitle("Approval Successful");
+                        successAlert.setHeaderText("Approval Successful");
+                        successAlert.setContentText("The paper has been forwarded for approval.");
+                        successAlert.showAndWait();
+
+                        // Refresh the queue data
+                        updateQueueData(dateBar, false, false);
+                    } catch (Exception ex) {
+                        System.out.println("Error: " + ex.getMessage());
+                    }
+                }
+            });
+        });
 
         actions.getChildren().addAll(approveButton, rejectButton);
 
         // Review status label
-        Label reviewStatus = new Label("Please review each item carefully.");
+        Label reviewStatus = new Label("All items must be corrected and/or marked as reviewed before forwarding.");
         reviewStatus.setStyle("-fx-font-weight: bold; -fx-padding: 5 0 0 0; -fx-font-size: 14px;");
 
         // Layout the components in a VBox
