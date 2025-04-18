@@ -1,5 +1,9 @@
 package edu.gmu.cs321.Reviewer;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.sql.ResultSet;
+
 import edu.gmu.cs321.DatabaseQuery;
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -12,8 +16,6 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
-import java.sql.ResultSet;
-import edu.gmu.cs321.Reviewer.Dashboard;
 
 
 public class LoginScreen extends Application {
@@ -81,8 +83,8 @@ public class LoginScreen extends Application {
 
             // try to hash the input password
             try {
-                java.security.MessageDigest digest = java.security.MessageDigest.getInstance("SHA-256");
-                byte[] hash = digest.digest(password.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                MessageDigest digest = MessageDigest.getInstance("SHA-256");
+                byte[] hash = digest.digest(password.getBytes(StandardCharsets.UTF_8));
                 hashedPassword = "";
                 for (byte b : hash) {
                     hashedPassword += String.format("%02x", b);
@@ -97,16 +99,15 @@ public class LoginScreen extends Application {
 
             // check that there is a row for username and hash(password)
             try {
-                String query = "SELECT * FROM users WHERE username = ? and password = ?";
+                String query = "SELECT * FROM users WHERE username = ? and password = ? and role = 'reviewer'";
                 ResultSet rs = db.executePQuery(query, username, hashedPassword);
 
                 if(!rs.next())
                     throw new java.sql.SQLException();
 
-                currentUserId = rs.getInt(1);
-                currentUserRole = rs.getString(2);
-                currentUser = rs.getString(3);
-
+                currentUserId = rs.getInt("userid");
+                currentUserRole = rs.getString("role");
+                currentUser = rs.getString("username");
             } catch (java.sql.SQLException e) {
                 e.printStackTrace();
                 failAlert.setTitle("Invalid credentials!");
@@ -124,7 +125,7 @@ public class LoginScreen extends Application {
 
         // scene
         Scene scene = new Scene(grid);
-        primaryStage.setMaximized(true);
+        //primaryStage.setMaximized(true);
         primaryStage.setScene(scene);
         primaryStage.show();
     }
