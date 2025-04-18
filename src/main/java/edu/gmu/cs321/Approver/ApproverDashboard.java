@@ -80,7 +80,7 @@ public class ApproverDashboard extends Application {
             if (selectedRecord != null) {
                 try {
                     // Update status in the database and locally
-                    dbQuery.updateRequestStatus(selectedRecord.getRequestId(), "Approved");
+                    dbQuery.updateRequestStatus(selectedRecord.getRequestID(), "Approved");
                     selectedRecord.setRequestStatus("Approved");
                     showConfirmation("Approved", selectedRecord);
                 } catch (SQLException e) {
@@ -97,7 +97,7 @@ public class ApproverDashboard extends Application {
             if (selectedRecord != null) {
                 try {
                     // Update status in the database and locally
-                    dbQuery.updateRequestStatus(selectedRecord.getRequestId(), "Rejected");
+                    dbQuery.updateRequestStatus(selectedRecord.getRequestID(), "Rejected");
                     selectedRecord.setRequestStatus("Rejected");
                     showConfirmation("Rejected", selectedRecord);
                 } catch (SQLException e) {
@@ -129,8 +129,7 @@ public class ApproverDashboard extends Application {
             ResultSet resultSet = dbQuery.getAllImmigrationRequests();
             while (resultSet.next()) {
                 immigrationRequests.add(new ImmigrationRequest(
-                        resultSet.getInt("request_id"),
-                        resultSet.getString("form_id"),
+                        resultSet.getString("request_id"),
                         resultSet.getString("requestor_name"),
                         resultSet.getString("requestor_citizenship"),
                         resultSet.getString("deceased_person_name"),

@@ -1,6 +1,7 @@
 package edu.gmu.cs321.Approver;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -99,7 +100,11 @@ public class LoginScreen extends Application {
     }
 
     public static void main(String[] args) {
-        launch(args);
+        Platform.runLater(() -> {
+            LoginScreen loginScreen = new LoginScreen();
+            Stage primaryStage = new Stage();
+            loginScreen.start(primaryStage);
+        });
     }
 }
 

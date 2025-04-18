@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 
 import edu.gmu.cs321.DatabaseQuery;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -131,6 +132,10 @@ public class LoginScreen extends Application {
     }
 
     public static void main(String[] args) {
-        launch(args);
+        Platform.runLater(() -> {
+            LoginScreen loginScreen = new LoginScreen();
+            Stage primaryStage = new Stage();
+            loginScreen.start(primaryStage);
+        });
     }
 }
