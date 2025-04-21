@@ -46,7 +46,7 @@ public class LoginScreen extends Application {
             String username = usernameField.getText();
             String password = passwordField.getText();
             if (validateLogin(username, password, primaryStage, actiontarget)) {
-                // Redirect to the dashboard after successful login
+                // Redirect to the dashboard after successful login.
             } else {
                 // Show an error message for failed login
                 actiontarget.setText("Invalid credentials. Please try again.");
