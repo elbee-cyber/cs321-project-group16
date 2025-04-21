@@ -62,7 +62,7 @@ public class DatabaseQuery {
              */
             // Users contains userid, username, password, role
             "CREATE TABLE IF NOT EXISTS users (userid INT PRIMARY KEY AUTO_INCREMENT, username VARCHAR(255) NOT NULL, password VARCHAR(255) NOT NULL, role VARCHAR(255) NOT NULL)",
-            "INSERT IGNORE INTO users (userid, role, username, password) VALUES (1, 'reviewer', 'guest', '84983c60f7daadc1cb8698621f802c0d9f9a3c3c295c810748fb048115c186ec'), (2, 'data entry', 'data', 'de28c09a560e498b6fb6ecbc45cd0cde'), (3, 'approver', 'approver', '9f3a5e0bdcaa80985b2a03c62203fc1ea761433ac63b0042da4f5f250166c1d0');",
+            "INSERT IGNORE INTO users (userid, role, username, password) VALUES (1, 'reviewer', 'guest', '84983c60f7daadc1cb8698621f802c0d9f9a3c3c295c810748fb048115c186ec'), (2, 'data entry', 'data', 'de28c09a560e498b6fb6ecbc45cd0cde'), (3, 'approver', 'approver', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f');",
 
             // Reviewer
             "CREATE TABLE IF NOT EXISTS reviewpapers (paper_id INT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(255) NOT NULL, ssn VARCHAR(255) NOT NULL, address VARCHAR(255) NOT NULL, cell VARCHAR(255) NOT NULL, email VARCHAR(255) NOT NULL)",
@@ -108,21 +108,18 @@ public class DatabaseQuery {
         } catch (IOException | SQLException e) {
             e.printStackTrace();
         }
+        /*
         //populate requestors from living.csv
         try (BufferedReader br = new BufferedReader(new FileReader("src/main/java/edu/gmu/cs321/living.csv"))) {
             String line;
-            String query = "INSERT IGNORE INTO dataqueue (requestID, requestorName, requestorCitizenship, deceasedName, isLegible, requestStatus, submissionDate) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            String query = "INSERT IGNORE INTO requestors (requestorName, requestorAddress, requestorCitizenship, requestorSSN, requestorCell, requestorEmail) VALUES (?, ?, ?, ?, ?, ?)";
             PreparedStatement pstmt = connection.prepareStatement(query);
             br.readLine(); // Skip the header line
             while ((line = br.readLine()) != null) {
                 String[] values = line.split(",");
  
                 for (int i = 0; i < values.length; i++) {
-                    if (i == 4) {
-                        pstmt.setBoolean(i + 1, Boolean.parseBoolean(values[i]));
-                    } else {
-                        pstmt.setString(i + 1, values[i]);
-                    }
+                    pstmt.setString(i + 1, values[i]);
                 }
                 pstmt.addBatch();
             }
@@ -134,18 +131,14 @@ public class DatabaseQuery {
         //populate deceased queue from deceased.csv
         try (BufferedReader br = new BufferedReader(new FileReader("src/main/java/edu/gmu/cs321/deceased.csv"))) {
             String line;
-            String query = "INSERT IGNORE INTO dataqueue (requestID, requestorName, requestorCitizenship, deceasedName, isLegible, requestStatus, submissionDate) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            String query = "INSERT IGNORE INTO deceased (deceasedName, deceasedDOB, deceasedSSN) VALUES (?, ?, ?)";
             PreparedStatement pstmt = connection.prepareStatement(query);
             br.readLine(); // Skip the header line
             while ((line = br.readLine()) != null) {
                 String[] values = line.split(",");
  
                 for (int i = 0; i < values.length; i++) {
-                    if (i == 4) {
-                        pstmt.setBoolean(i + 1, Boolean.parseBoolean(values[i]));
-                    } else {
-                        pstmt.setString(i + 1, values[i]);
-                    }
+                    pstmt.setString(i + 1, values[i]);
                 }
                 pstmt.addBatch();
             }
@@ -154,6 +147,7 @@ public class DatabaseQuery {
         } catch (IOException | SQLException e) {
             e.printStackTrace();
         }
+            */
         return this.connection;
     }
 

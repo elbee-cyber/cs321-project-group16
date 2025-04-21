@@ -1,90 +1,90 @@
-requestorName,address,ssn,phone,email
-John Doe,123 Maple St, Springfield, IL, 62701,123-45-6789,217-555-1234,john.doe@example.com
-Mary Johnson,456 Oak Ave, Lincoln, NE, 68502,234-56-7890,402-555-2345,mary.johnson@example.com
-James Williams,789 Pine Rd, Madison, WI, 53703,345-67-8901,608-555-3456,james.williams@example.com
-Patricia Jones,101 Elm St, Columbus, OH, 43215,456-78-9012,614-555-4567,patricia.jones@example.com
-Robert Garcia,202 Birch Ln, Denver, CO, 80203,567-89-0123,303-555-5678,robert.garcia@example.com
-Linda Martinez,303 Cedar Ct, Austin, TX, 73301,678-90-1234,512-555-6789,linda.martinez@example.com
-Michael Rodriguez,404 Walnut Dr, Phoenix, AZ, 85001,789-01-2345,602-555-7890,michael.rodriguez@example.com
-Elizabeth Hernandez,505 Ash Blvd, Atlanta, GA, 30301,890-12-3456,404-555-8901,elizabeth.hernandez@example.com
-William Moore,606 Cherry St, Nashville, TN, 37201,901-23-4567,615-555-9012,william.moore@example.com
-Barbara Taylor,707 Poplar Ave, Seattle, WA, 98101,012-34-5678,206-555-0123,barbara.taylor@example.com
-Richard Clark,808 Willow Rd, Portland, OR, 97201,123-45-6780,503-555-1234,richard.clark@example.com
-Susan Lewis,909 Spruce Ln, Miami, FL, 33101,234-56-7891,305-555-2345,susan.lewis@example.com
-Joseph Walker,111 Maple St, Boston, MA, 02108,345-67-8902,617-555-3456,joseph.walker@example.com
-Karen Hall,222 Oak Ave, Chicago, IL, 60601,456-78-9013,312-555-4567,karen.hall@example.com
-Thomas Allen,333 Pine Rd, Houston, TX, 77001,567-89-0124,713-555-5678,thomas.allen@example.com
-Nancy Young,444 Elm St, San Francisco, CA, 94101,678-90-1235,415-555-6789,nancy.young@example.com
-Charles King,555 Birch Ln, Las Vegas, NV, 89101,789-01-2346,702-555-7890,charles.king@example.com
-Lisa Wright,666 Cedar Ct, Minneapolis, MN, 55401,890-12-3457,612-555-8901,lisa.wright@example.com
-Christopher Scott,777 Walnut Dr, Kansas City, MO, 64101,901-23-4568,816-555-9012,christopher.scott@example.com
-Margaret Adams,888 Ash Blvd, Charlotte, NC, 28201,012-34-5679,704-555-0123,margaret.adams@example.com
-Daniel Harris,999 Cherry St, Indianapolis, IN, 46201,123-45-6781,317-555-1234,daniel.harris@example.com
-Emily Clark,121 Poplar Ave, Columbus, GA, 31901,234-56-7892,706-555-2345,emily.clark@example.com
-Andrew Lewis,232 Willow Rd, Louisville, KY, 40201,345-67-8903,502-555-3456,andrew.lewis@example.com
-Jessica Walker,343 Spruce Ln, Milwaukee, WI, 53201,456-78-9014,414-555-4567,jessica.walker@example.com
-David Hall,454 Maple St, Albuquerque, NM, 87101,567-89-0125,505-555-5678,david.hall@example.com
-Sarah King,565 Oak Ave, Tucson, AZ, 85701,678-90-1236,520-555-6789,sarah.king@example.com
-Michael Wright,676 Pine Rd, Fresno, CA, 93701,789-01-2347,559-555-7890,michael.wright@example.com
-Laura Scott,787 Elm St, Sacramento, CA, 94203,890-12-3458,916-555-8901,laura.scott@example.com
-Joshua Adams,898 Birch Ln, Mesa, AZ, 85201,901-23-4569,480-555-9012,joshua.adams@example.com
-Amanda Harris,909 Cedar Ct, Omaha, NE, 68101,012-34-5670,402-555-0123,amanda.harris@example.com
-Matthew Clark,111 Walnut Dr, Raleigh, NC, 27601,123-45-6782,919-555-1234,matthew.clark@example.com
-Olivia Lewis,222 Maple St, Richmond, VA, 23219,234-56-7893,804-555-2345,olivia.lewis@example.com
-Ethan Walker,333 Oak Ave, Salt Lake City, UT, 84101,345-67-8904,801-555-3456,ethan.walker@example.com
-Sophia Hall,444 Pine Rd, Des Moines, IA, 50309,456-78-9015,515-555-4567,sophia.hall@example.com
-Alexander King,555 Elm St, Little Rock, AR, 72201,567-89-0126,501-555-5678,alexander.king@example.com
-Emma Wright,666 Birch Ln, Charleston, SC, 29401,678-90-1237,843-555-6789,emma.wright@example.com
-Oliver Scott,777 Cedar Ct, Jackson, MS, 39201,789-01-2348,601-555-7890,oliver.scott@example.com
-Charlotte Adams,888 Walnut Dr, Montgomery, AL, 36101,890-12-3459,334-555-8901,charlotte.adams@example.com
-Henry Harris,999 Ash Blvd, Baton Rouge, LA, 70801,901-23-4570,225-555-9012,henry.harris@example.com
-Amelia Clark,121 Cherry St, Anchorage, AK, 99501,012-34-5671,907-555-0123,amelia.clark@example.com
-Jack Lewis,232 Poplar Ave, Boise, ID, 83701,123-45-6783,208-555-1234,jack.lewis@example.com
-Grace Walker,343 Willow Rd, Cheyenne, WY, 82001,234-56-7894,307-555-2345,grace.walker@example.com
-James Hall,454 Spruce Ln, Dover, DE, 19901,345-67-8905,302-555-3456,james.hall@example.com
-Isabella King,565 Maple St, Hartford, CT, 06101,456-78-9016,860-555-4567,isabella.king@example.com
-William Wright,676 Oak Ave, Concord, NH, 03301,567-89-0127,603-555-5678,william.wright@example.com
-Emily Scott,787 Pine Rd, Augusta, ME, 04330,678-90-1238,207-555-6789,emily.scott@example.com
-Daniel Adams,898 Elm St, Montpelier, VT, 05602,789-01-2349,802-555-7890,daniel.adams@example.com
-Charlotte Harris,909 Birch Ln, Pierre, SD, 57501,890-12-3460,605-555-8901,charlotte.harris@example.com
-Henry Clark,111 Cedar Ct, Helena, MT, 59601,901-23-4571,406-555-9012,henry.clark@example.com
-Amelia Lewis,222 Walnut Dr, Bismarck, ND, 58501,012-34-5672,701-555-0123,amelia.lewis@example.com
-Jack Walker,333 Ash Blvd, Juneau, AK, 99801,123-45-6784,907-555-2345,jack.walker@example.com
-Grace Hall,444 Cherry St, Honolulu, HI, 96801,234-56-7895,808-555-3456,grace.hall@example.com
-James King,555 Poplar Ave, Carson City, NV, 89701,345-67-8906,775-555-4567,james.king@example.com
-Isabella Wright,666 Willow Rd, Tallahassee, FL, 32301,456-78-9017,850-555-5678,isabella.wright@example.com
-William Scott,777 Spruce Ln, Columbia, SC, 29201,567-89-0128,803-555-6789,william.scott@example.com
-Emily Adams,888 Maple St, Frankfort, KY, 40601,678-90-1239,502-555-7890,emily.adams@example.com
-Daniel Harris,999 Oak Ave, Harrisburg, PA, 17101,789-01-2350,717-555-8901,daniel.harris@example.com
-Charlotte Clark,121 Pine Rd, Trenton, NJ, 08601,890-12-3461,609-555-9012,charlotte.clark@example.com
-Henry Lewis,232 Elm St, Albany, NY, 12201,901-23-4572,518-555-0123,henry.lewis@example.com
-Amelia Walker,343 Birch Ln, Olympia, WA, 98501,012-34-5673,360-555-1234,amelia.walker@example.com
-Jack Hall,454 Cedar Ct, Salem, OR, 97301,123-45-6785,503-555-2345,jack.hall@example.com
-Grace King,565 Walnut Dr, Santa Fe, NM, 87501,234-56-7896,505-555-3456,grace.king@example.com
-James Wright,676 Ash Blvd, Phoenix, AZ, 85001,345-67-8907,602-555-4567,james.wright@example.com
-Isabella Scott,787 Cherry St, Denver, CO, 80203,456-78-9018,303-555-5678,isabella.scott@example.com
-William Adams,898 Poplar Ave, Austin, TX, 73301,567-89-0129,512-555-6789,william.adams@example.com
-Emily Harris,909 Willow Rd, Atlanta, GA, 30301,678-90-1240,404-555-7890,emily.harris@example.com
-Daniel Clark,111 Spruce Ln, Nashville, TN, 37201,789-01-2351,615-555-8901,daniel.clark@example.com
-Charlotte Lewis,222 Maple St, Seattle, WA, 98101,890-12-3462,206-555-9012,charlotte.lewis@example.com
-Henry Walker,333 Oak Ave, Portland, OR, 97201,901-23-4573,503-555-0123,henry.walker@example.com
-Amelia Hall,444 Pine Rd, Miami, FL, 33101,012-34-5674,305-555-1234,amelia.hall@example.com
-Jack King,555 Elm St, Boston, MA, 02108,123-45-6786,617-555-2345,jack.king@example.com
-Grace Wright,666 Birch Ln, Chicago, IL, 60601,234-56-7897,312-555-3456,grace.wright@example.com
-James Scott,777 Cedar Ct, Houston, TX, 77001,345-67-8908,713-555-4567,james.scott@example.com
-Charlotte Walker,888 Walnut Dr, San Francisco, CA, 94101,456-78-9019,415-555-5678,charlotte.walker@example.com
-Henry Hall,999 Ash Blvd, Las Vegas, NV, 89101,567-89-0130,702-555-6789,henry.hall@example.com
-Amelia King,121 Cherry St, Austin, TX, 73301,678-90-1241,512-555-7890,amelia.king@example.com
-Jack Wright,232 Poplar Ave, Phoenix, AZ, 85001,789-01-2352,602-555-8901,jack.wright@example.com
-Grace Scott,343 Willow Rd, Atlanta, GA, 30301,890-12-3463,404-555-9012,grace.scott@example.com
-James Adams,454 Spruce Ln, Nashville, TN, 37201,901-23-4574,615-555-0123,james.adams@example.com
-Isabella Harris,565 Maple St, Seattle, WA, 98101,012-34-5675,206-555-1234,isabella.harris@example.com
-William Clark,676 Oak Ave, Portland, OR, 97201,123-45-6787,503-555-2345,william.clark@example.com
-Emily Lewis,787 Pine Rd, Miami, FL, 33101,234-56-7898,305-555-3456,emily.lewis@example.com
-Daniel Walker,898 Elm St, Boston, MA, 02108,345-67-8909,617-555-4567,daniel.walker@example.com
-Grace Adams,909 Birch Ln, Chicago, IL, 60601,456-78-9020,312-555-5678,grace.adams@example.com
-James Harris,111 Walnut Dr, Houston, TX, 77001,567-89-0131,713-555-6789,james.harris@example.com
-Charlotte King,222 Maple St, San Francisco, CA, 94101,678-90-1242,415-555-7890,charlotte.king@example.com
-Henry Wright,333 Oak Ave, Las Vegas, NV, 89101,789-01-2353,702-555-8901,henry.wright@example.com
-Isabella Lewis,444 Pine Rd, Austin, TX, 73301,890-12-3464,512-555-9012,isabella.lewis@example.com
-William Walker,555 Elm St, Phoenix, AZ, 85001,901-23-4575,602-555-0123,william.walker@example.com
+requestorName,address,citizenshipStatus,ssn,phone,email
+John Doe,123 Maple St, Springfield, IL, 62701,citizen,123-45-6789,217-555-1234,john.doe@example.com
+Mary Johnson,456 Oak Ave, Lincoln, NE, 68502,non-citizen,234-56-7890,402-555-2345,mary.johnson@example.com
+James Williams,789 Pine Rd, Madison, WI, 53703,citizen,345-67-8901,608-555-3456,james.williams@example.com
+Patricia Jones,101 Elm St, Columbus, OH, 43215,non-citizen,456-78-9012,614-555-4567,patricia.jones@example.com
+Robert Garcia,202 Birch Ln, Denver, CO, 80203,citizen,567-89-0123,303-555-5678,robert.garcia@example.com
+Linda Martinez,303 Cedar Ct, Austin, TX, 73301,non-citizen,678-90-1234,512-555-6789,linda.martinez@example.com
+Michael Rodriguez,404 Walnut Dr, Phoenix, AZ, 85001,citizen,789-01-2345,602-555-7890,michael.rodriguez@example.com
+Elizabeth Hernandez,505 Ash Blvd, Atlanta, GA, 30301,non-citizen,890-12-3456,404-555-8901,elizabeth.hernandez@example.com
+William Moore,606 Cherry St, Nashville, TN, 37201,citizen,901-23-4567,615-555-9012,william.moore@example.com
+Barbara Taylor,707 Poplar Ave, Seattle, WA, 98101,non-citizen,012-34-5678,206-555-0123,barbara.taylor@example.com
+Richard Clark,808 Willow Rd, Portland, OR, 97201,citizen,123-45-6780,503-555-1234,richard.clark@example.com
+Susan Lewis,909 Spruce Ln, Miami, FL, 33101,non-citizen,234-56-7891,305-555-2345,susan.lewis@example.com
+Joseph Walker,111 Maple St, Boston, MA, 02108,citizen,345-67-8902,617-555-3456,joseph.walker@example.com
+Karen Hall,222 Oak Ave, Chicago, IL, 60601,non-citizen,456-78-9013,312-555-4567,karen.hall@example.com
+Thomas Allen,333 Pine Rd, Houston, TX, 77001,citizen,567-89-0124,713-555-5678,thomas.allen@example.com
+Nancy Young,444 Elm St, San Francisco, CA, 94101,non-citizen,678-90-1235,415-555-6789,nancy.young@example.com
+Charles King,555 Birch Ln, Las Vegas, NV, 89101,citizen,789-01-2346,702-555-7890,charles.king@example.com
+Lisa Wright,666 Cedar Ct, Minneapolis, MN, 55401,non-citizen,890-12-3457,612-555-8901,lisa.wright@example.com
+Christopher Scott,777 Walnut Dr, Kansas City, MO, 64101,citizen,901-23-4568,816-555-9012,christopher.scott@example.com
+Margaret Adams,888 Ash Blvd, Charlotte, NC, 28201,non-citizen,012-34-5679,704-555-0123,margaret.adams@example.com
+Daniel Harris,999 Cherry St, Indianapolis, IN, 46201,citizen,123-45-6781,317-555-1234,daniel.harris@example.com
+Emily Clark,121 Poplar Ave, Columbus, GA, 31901,non-citizen,234-56-7892,706-555-2345,emily.clark@example.com
+Andrew Lewis,232 Willow Rd, Louisville, KY, 40201,citizen,345-67-8903,502-555-3456,andrew.lewis@example.com
+Jessica Walker,343 Spruce Ln, Milwaukee, WI, 53201,non-citizen,456-78-9014,414-555-4567,jessica.walker@example.com
+David Hall,454 Maple St, Albuquerque, NM, 87101,citizen,567-89-0125,505-555-5678,david.hall@example.com
+Sarah King,565 Oak Ave, Tucson, AZ, 85701,non-citizen,678-90-1236,520-555-6789,sarah.king@example.com
+Michael Wright,676 Pine Rd, Fresno, CA, 93701,citizen,789-01-2347,559-555-7890,michael.wright@example.com
+Laura Scott,787 Elm St, Sacramento, CA, 94203,non-citizen,890-12-3458,916-555-8901,laura.scott@example.com
+Joshua Adams,898 Birch Ln, Mesa, AZ, 85201,citizen,901-23-4569,480-555-9012,joshua.adams@example.com
+Amanda Harris,909 Cedar Ct, Omaha, NE, 68101,non-citizen,012-34-5670,402-555-0123,amanda.harris@example.com
+Matthew Clark,111 Walnut Dr, Raleigh, NC, 27601,citizen,123-45-6782,919-555-1234,matthew.clark@example.com
+Olivia Lewis,222 Maple St, Richmond, VA, 23219,non-citizen,234-56-7893,804-555-2345,olivia.lewis@example.com
+Ethan Walker,333 Oak Ave, Salt Lake City, UT, 84101,citizen,345-67-8904,801-555-3456,ethan.walker@example.com
+Sophia Hall,444 Pine Rd, Des Moines, IA, 50309,non-citizen,456-78-9015,515-555-4567,sophia.hall@example.com
+Alexander King,555 Elm St, Little Rock, AR, 72201,citizen,567-89-0126,501-555-5678,alexander.king@example.com
+Emma Wright,666 Birch Ln, Charleston, SC, 29401,non-citizen,678-90-1237,843-555-6789,emma.wright@example.com
+Oliver Scott,777 Cedar Ct, Jackson, MS, 39201,citizen,789-01-2348,601-555-7890,oliver.scott@example.com
+Charlotte Adams,888 Walnut Dr, Montgomery, AL, 36101,non-citizen,890-12-3459,334-555-8901,charlotte.adams@example.com
+Henry Harris,999 Ash Blvd, Baton Rouge, LA, 70801,citizen,901-23-4570,225-555-9012,henry.harris@example.com
+Amelia Clark,121 Cherry St, Anchorage, AK, 99501,non-citizen,012-34-5671,907-555-0123,amelia.clark@example.com
+Jack Lewis,232 Poplar Ave, Boise, ID, 83701,citizen,123-45-6783,208-555-1234,jack.lewis@example.com
+Grace Walker,343 Willow Rd, Cheyenne, WY, 82001,non-citizen,234-56-7894,307-555-2345,grace.walker@example.com
+James Hall,454 Spruce Ln, Dover, DE, 19901,citizen,345-67-8905,302-555-3456,james.hall@example.com
+Isabella King,565 Maple St, Hartford, CT, 06101,non-citizen,456-78-9016,860-555-4567,isabella.king@example.com
+William Wright,676 Oak Ave, Concord, NH, 03301,citizen,567-89-0127,603-555-5678,william.wright@example.com
+Emily Scott,787 Pine Rd, Augusta, ME, 04330,non-citizen,678-90-1238,207-555-6789,emily.scott@example.com
+Daniel Adams,898 Elm St, Montpelier, VT, 05602,citizen,789-01-2349,802-555-7890,daniel.adams@example.com
+Charlotte Harris,909 Birch Ln, Pierre, SD, 57501,non-citizen,890-12-3460,605-555-8901,charlotte.harris@example.com
+Henry Clark,111 Cedar Ct, Helena, MT, 59601,citizen,901-23-4571,406-555-9012,henry.clark@example.com
+Amelia Lewis,222 Walnut Dr, Bismarck, ND, 58501,non-citizen,012-34-5672,701-555-0123,amelia.lewis@example.com
+Jack Walker,333 Ash Blvd, Juneau, AK, 99801,citizen,123-45-6784,907-555-2345,jack.walker@example.com
+Grace Hall,444 Cherry St, Honolulu, HI, 96801,non-citizen,234-56-7895,808-555-3456,grace.hall@example.com
+James King,555 Poplar Ave, Carson City, NV, 89701,citizen,345-67-8906,775-555-4567,james.king@example.com
+Isabella Wright,666 Willow Rd, Tallahassee, FL, 32301,non-citizen,456-78-9017,850-555-5678,isabella.wright@example.com
+William Scott,777 Spruce Ln, Columbia, SC, 29201,citizen,567-89-0128,803-555-6789,william.scott@example.com
+Emily Adams,888 Maple St, Frankfort, KY, 40601,non-citizen,678-90-1239,502-555-7890,emily.adams@example.com
+Daniel Harris,999 Oak Ave, Harrisburg, PA, 17101,citizen,789-01-2350,717-555-8901,daniel.harris@example.com
+Charlotte Clark,121 Pine Rd, Trenton, NJ, 08601,non-citizen,890-12-3461,609-555-9012,charlotte.clark@example.com
+Henry Lewis,232 Elm St, Albany, NY, 12201,citizen,901-23-4572,518-555-0123,henry.lewis@example.com
+Amelia Walker,343 Birch Ln, Olympia, WA, 98501,non-citizen,012-34-5673,360-555-1234,amelia.walker@example.com
+Jack Hall,454 Cedar Ct, Salem, OR, 97301,citizen,123-45-6785,503-555-2345,jack.hall@example.com
+Grace King,565 Walnut Dr, Santa Fe, NM, 87501,non-citizen,234-56-7896,505-555-3456,grace.king@example.com
+James Wright,676 Ash Blvd, Phoenix, AZ, 85001,citizen,345-67-8907,602-555-4567,james.wright@example.com
+Isabella Scott,787 Cherry St, Denver, CO, 80203,non-citizen,456-78-9018,303-555-5678,isabella.scott@example.com
+William Adams,898 Poplar Ave, Austin, TX, 73301,citizen,567-89-0129,512-555-6789,william.adams@example.com
+Emily Harris,909 Willow Rd, Atlanta, GA, 30301,non-citizen,678-90-1240,404-555-7890,emily.harris@example.com
+Daniel Clark,111 Spruce Ln, Nashville, TN, 37201,citizen,789-01-2351,615-555-8901,daniel.clark@example.com
+Charlotte Lewis,222 Maple St, Seattle, WA, 98101,non-citizen,890-12-3462,206-555-9012,charlotte.lewis@example.com
+Henry Walker,333 Oak Ave, Portland, OR, 97201,citizen,901-23-4573,503-555-0123,henry.walker@example.com
+Amelia Hall,444 Pine Rd, Miami, FL, 33101,non-citizen,012-34-5674,305-555-1234,amelia.hall@example.com
+Jack King,555 Elm St, Boston, MA, 02108,citizen,123-45-6786,617-555-2345,jack.king@example.com
+Grace Wright,666 Birch Ln, Chicago, IL, 60601,non-citizen,234-56-7897,312-555-3456,grace.wright@example.com
+James Scott,777 Cedar Ct, Houston, TX, 77001,citizen,345-67-8908,713-555-4567,james.scott@example.com
+Charlotte Walker,888 Walnut Dr, San Francisco, CA, 94101,non-citizen,456-78-9019,415-555-5678,charlotte.walker@example.com
+Henry Hall,999 Ash Blvd, Las Vegas, NV, 89101,citizen,567-89-0130,702-555-6789,henry.hall@example.com
+Amelia King,121 Cherry St, Austin, TX, 73301,non-citizen,678-90-1241,512-555-7890,amelia.king@example.com
+Jack Wright,232 Poplar Ave, Phoenix, AZ, 85001,citizen,789-01-2352,602-555-8901,jack.wright@example.com
+Grace Scott,343 Willow Rd, Atlanta, GA, 30301,non-citizen,890-12-3463,404-555-9012,grace.scott@example.com
+James Adams,454 Spruce Ln, Nashville, TN, 37201,citizen,901-23-4574,615-555-0123,james.adams@example.com
+Isabella Harris,565 Maple St, Seattle, WA, 98101,non-citizen,012-34-5675,206-555-1234,isabella.harris@example.com
+William Clark,676 Oak Ave, Portland, OR, 97201,citizen,123-45-6787,503-555-2345,william.clark@example.com
+Emily Lewis,787 Pine Rd, Miami, FL, 33101,non-citizen,234-56-7898,305-555-3456,emily.lewis@example.com
+Daniel Walker,898 Elm St, Boston, MA, 02108,citizen,345-67-8909,617-555-4567,daniel.walker@example.com
+Grace Adams,909 Birch Ln, Chicago, IL, 60601,non-citizen,456-78-9020,312-555-5678,grace.adams@example.com
+James Harris,111 Walnut Dr, Houston, TX, 77001,citizen,567-89-0131,713-555-6789,james.harris@example.com
+Charlotte King,222 Maple St, San Francisco, CA, 94101,non-citizen,678-90-1242,415-555-7890,charlotte.king@example.com
+Henry Wright,333 Oak Ave, Las Vegas, NV, 89101,citizen,789-01-2353,702-555-8901,henry.wright@example.com
+Isabella Lewis,444 Pine Rd, Austin, TX, 73301,non-citizen,890-12-3464,512-555-9012,isabella.lewis@example.com
+William Walker,555 Elm St, Phoenix, AZ, 85001,citizen,901-23-4575,602-555-0123,william.walker@example.com

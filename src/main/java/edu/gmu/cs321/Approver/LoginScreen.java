@@ -152,6 +152,7 @@ public class LoginScreen extends Application {
                 }
                 hexString.append(hex);
             }
+            System.out.println("Hashed password: " + hexString.toString());
             return hexString.toString();
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
