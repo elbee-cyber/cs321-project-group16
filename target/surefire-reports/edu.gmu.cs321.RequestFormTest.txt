@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: edu.gmu.cs321.RequestFormTest
 -------------------------------------------------------------------------------
-Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s - in edu.gmu.cs321.RequestFormTest
+Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.02 s - in edu.gmu.cs321.RequestFormTest

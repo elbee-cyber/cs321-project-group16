@@ -38,6 +38,11 @@ public class DatabaseQuery {
             "UPDATE users SET password = 'de28c09a560e498b6fb6ecbc45cd0cde' WHERE userid = 2;",
             "UPDATE users SET username = 'data' WHERE userid = 2;",
 
+            "UPDATE users SET password = '9f3a5e0bdcaa80985b2a03c62203fc1ea761433ac63b0042da4f5f250166c1d0' WHERE userid = 3;",
+            "UPDATE users SET username = 'approver' WHERE userid = 3;",
+        
+
+
             /**
              * Drop all tables to start fresh
              * FOREIGN_KEY_CHECKS to cascade constraints
@@ -57,7 +62,7 @@ public class DatabaseQuery {
              */
             // Users contains userid, username, password, role
             "CREATE TABLE IF NOT EXISTS users (userid INT PRIMARY KEY AUTO_INCREMENT, username VARCHAR(255) NOT NULL, password VARCHAR(255) NOT NULL, role VARCHAR(255) NOT NULL)",
-            "INSERT IGNORE INTO users (userid, role, username, password) VALUES (1, 'reviewer', 'guest', '84983c60f7daadc1cb8698621f802c0d9f9a3c3c295c810748fb048115c186ec'), (2, 'data entry', 'data', 'de28c09a560e498b6fb6ecbc45cd0cde');",
+            "INSERT IGNORE INTO users (userid, role, username, password) VALUES (1, 'reviewer', 'guest', '84983c60f7daadc1cb8698621f802c0d9f9a3c3c295c810748fb048115c186ec'), (2, 'data entry', 'data', 'de28c09a560e498b6fb6ecbc45cd0cde'), (3, 'approver', 'approver', '9f3a5e0bdcaa80985b2a03c62203fc1ea761433ac63b0042da4f5f250166c1d0');",
 
             // Reviewer
             "CREATE TABLE IF NOT EXISTS reviewpapers (paper_id INT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(255) NOT NULL, ssn VARCHAR(255) NOT NULL, address VARCHAR(255) NOT NULL, cell VARCHAR(255) NOT NULL, email VARCHAR(255) NOT NULL)",

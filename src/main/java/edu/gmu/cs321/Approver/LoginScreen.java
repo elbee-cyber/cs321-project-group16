@@ -4,14 +4,16 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.Button;
-import javafx.scene.control.Hyperlink;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import edu.gmu.cs321.Approver.ApproverDashboard;
+import edu.gmu.cs321.DatabaseQuery;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * This class represents the login screen for the approver, where they can authenticate
@@ -36,54 +38,125 @@ public class LoginScreen extends Application {
         Button loginButton = new Button("Login");
         Hyperlink forgotPasswordLink = new Hyperlink("Forgot Password?");
 
+        // Create a label to show the login status
+        Label actiontarget = new Label();
+
         // Handle the login action
         loginButton.setOnAction(event -> {
             String username = usernameField.getText();
             String password = passwordField.getText();
-            if (validateLogin(username, password)) {
+            if (validateLogin(username, password, primaryStage, actiontarget)) {
                 // Redirect to the dashboard after successful login
-                showDashboard(primaryStage);
             } else {
                 // Show an error message for failed login
-                showErrorMessage("Invalid credentials. Please try again.");
+                actiontarget.setText("Invalid credentials. Please try again.");
             }
         });
 
         // Layout and Scene
-        VBox vbox = new VBox(10, usernameField, passwordField, loginButton, forgotPasswordLink);
+        VBox vbox = new VBox(10, usernameField, passwordField, loginButton, forgotPasswordLink, actiontarget);
         vbox.setAlignment(Pos.CENTER);
         vbox.setMinSize(300, 200);
 
         Scene scene = new Scene(vbox);
-        primaryStage.setTitle("Approver Login");
+        primaryStage.setTitle("Login");
         primaryStage.setScene(scene);
         primaryStage.show();
     }
 
     /**
-     * Validates login credentials.
-     *
-     * @param username the username entered
-     * @param password the password entered
-     * @return true if credentials are valid, false otherwise
+     * Validates the login credentials by checking the provided username and password against the database.
+     * 
+     * @param username the username entered by the user
+     * @param password the password entered by the user
+     * @param primaryStage the current login stage
+     * @param actiontarget the label for displaying login status
+     * @return true if the login credentials are valid (username exists and password matches),
+     *         false if the credentials are invalid (incorrect username or password),
+     *         or if there is a database error.
+     * @throws SQLException if a database access error occurs during the query
      */
-    private boolean validateLogin(String username, String password) {
-        // Example logic to validate credentials (can be replaced with real validation)
-        return "approver".equals(username) && "password123".equals(password);
+    private boolean validateLogin(String username, String password, Stage primaryStage, Label actiontarget) {
+        DatabaseQuery dbQuery = new DatabaseQuery();
+
+        try {
+            // Connect to the database
+            Connection connection = dbQuery.connect();
+            
+            // Prepare SQL query to check the username and password
+            String query = "SELECT * FROM users WHERE username = ?";
+            ResultSet resultSet = dbQuery.executePQuery(query, username);
+
+            if (resultSet.next()) {
+                // Retrieve the stored password hash from the database
+                String storedPasswordHash = resultSet.getString("password");
+
+                // Hash the input password and compare it with the stored hash
+                if (verifyPassword(password, storedPasswordHash)) {
+                    // If login is successful, retrieve the role and redirect to the appropriate dashboard
+                    String selectedRole = resultSet.getString("role");
+                    actiontarget.setText("Login successful! Role: " + selectedRole);
+
+                    // Proceed to the appropriate dashboard based on role
+                    if ("approver".equals(selectedRole)) {
+                        // For Approver role, show Approver Dashboard
+                        ApproverDashboard approverDashboard = new ApproverDashboard();
+                        approverDashboard.start(primaryStage);
+                    } else {
+                        // For any other role, handle appropriately or show an error
+                        actiontarget.setText("Invalid role associated with the username.");
+                    }
+
+                    return true;  // Login successful
+                } else {
+                    return false;  // Incorrect password
+                }
+            } else {
+                return false;  // Username doesn't exist
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;  // Database error
+        }
     }
 
     /**
-     * Redirects to the approver dashboard after a successful login.
-     *
-     * @param primaryStage the current login stage
+     * Verifies the password by hashing the input password and comparing it to the stored hash.
+     * 
+     * @param inputPassword the password entered by the user
+     * @param storedPasswordHash the password hash stored in the database
+     * @return true if the passwords match, false otherwise
      */
-    private void showDashboard(Stage primaryStage) {
-        // Close the current login window
-        primaryStage.close();
+    private boolean verifyPassword(String inputPassword, String storedPasswordHash) {
+        String hashedInput = hashPassword(inputPassword);
+        return hashedInput != null && hashedInput.equals(storedPasswordHash);
+    }
 
-        // Create and launch the Approver Dashboard
-        ApproverDashboard approverDashboard = new ApproverDashboard();
-        approverDashboard.start(new Stage());
+    /**
+     * Hashes the provided password using SHA-256.
+     *
+     * @param password the password to hash
+     * @return the hashed password string or {@code null} if an error occurs
+     */
+    private String hashPassword(String password) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(password.getBytes());
+            StringBuilder hexString = new StringBuilder();
+
+            // Convert byte array to hexadecimal string
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) {
+                    hexString.append('0');
+                }
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     /**
@@ -92,13 +165,18 @@ public class LoginScreen extends Application {
      * @param message the error message to display
      */
     private void showErrorMessage(String message) {
-        Alert alert = new Alert(AlertType.ERROR);
+        Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Login Error");
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
     }
 
+    /**
+     * The main method to launch the login screen.
+     * 
+     * @param args command-line arguments (not used)
+     */
     public static void main(String[] args) {
         Platform.runLater(() -> {
             LoginScreen loginScreen = new LoginScreen();
@@ -107,4 +185,3 @@ public class LoginScreen extends Application {
         });
     }
 }
-
