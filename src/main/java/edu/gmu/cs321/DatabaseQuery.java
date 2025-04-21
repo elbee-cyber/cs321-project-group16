@@ -51,6 +51,10 @@ public class DatabaseQuery {
             "DROP TABLE IF EXISTS reviewqueue",
             "DROP TABLE IF EXISTS reviewpapers",
             "DROP TABLE IF EXISTS users",
+            //UNCOMMENT THESE TO REFRESH THE TABLES IF YOU CHANGE THE CSV FILES, RUN ONCE, THEN RECOMMENT THEM
+            /*"DROP TABLE IF EXISTS dataqueue",
+            "DROP TABLE IF EXISTS requestors",
+            "DROP TABLE IF EXISTS deceased",*/
             "SET FOREIGN_KEY_CHECKS = 1",
 
             /**
@@ -66,7 +70,7 @@ public class DatabaseQuery {
             "CREATE TABLE IF NOT EXISTS reviewqueue (queue_id INT PRIMARY KEY AUTO_INCREMENT, userid INT NOT NULL, paper_id INT NOT NULL, status VARCHAR(255) NOT NULL, date DATE NOT NULL, FOREIGN KEY (userid) REFERENCES users(userid), FOREIGN KEY (paper_id) REFERENCES reviewpapers(paper_id))",
 
             //Data Entry
-            "CREATE TABLE IF NOT EXISTS dataqueue (requestID INT PRIMARY KEY NOT NULL, requestorName VARCHAR(255) NOT NULL, requestorCitizenship VARCHAR(255) NOT NULL, deceasedName VARCHAR(255) NOT NULL, isLegible BOOL NOT NULL, requestStatus VARCHAR(255) NOT NULL, submissionDate DATE NOT NULL, relationship VARCHAR(255) NOT NULL, reason VARCHAR(255))",
+            "CREATE TABLE IF NOT EXISTS dataqueue (requestID INT PRIMARY KEY NOT NULL, requestorName VARCHAR(255) NOT NULL, requestorCitizenship VARCHAR(255) NOT NULL, deceasedName VARCHAR(255) NOT NULL, isLegible BOOL NOT NULL, requestStatus VARCHAR(255) NOT NULL, submissionDate DATE NOT NULL, relationship VARCHAR(255) NOT NULL, reason VARCHAR(255), rejectionReason VARCHAR(255))",
 
             //Requestors
             "CREATE TABLE IF NOT EXISTS requestors (requestorID INT PRIMARY KEY AUTO_INCREMENT, requestorName VARCHAR(255) NOT NULL, requestorAddress VARCHAR(255) NOT NULL, requestorCity VARCHAR(255) NOT NULL, requestorState VARCHAR(255) NOT NULL, requestorZip VARCHAR(255) NOT NULL, requestorCitizenship VARCHAR(255) NOT NULL, requestorSSN VARCHAR(255) NOT NULL, requestorCell VARCHAR(255) NOT NULL, requestorEmail VARCHAR(255) NOT NULL)",
@@ -224,6 +228,12 @@ public class DatabaseQuery {
     public ResultSet getAllImmigrationRequests() throws SQLException {
         String query = "SELECT * FROM reviewpapers";
         return executeQuery(query);
+    }
+
+    public void close() throws SQLException {
+        if (connection != null && !connection.isClosed()) {
+            connection.close();
+        }
     }
 
 }

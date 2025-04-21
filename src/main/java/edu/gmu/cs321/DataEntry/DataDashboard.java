@@ -6,11 +6,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import edu.gmu.cs321.DatabaseQuery;
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.ColumnConstraints;
@@ -46,7 +46,7 @@ public class DataDashboard extends Application {
     private void updatePreviewBox(VBox previewBox, Entry entryForm) {
         // Clear previous labels if any
         previewBox.getChildren().clear();
-        Label requestIDLabel = new Label("Request ID: " + entryForm.getRequestID());
+        Label requestIDLabel = new Label("Request ID: " + entryForm.getRequestID() + " ("+ entryForm.getRequestStatus() + ")");
         requestIDLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #333;");
         Label requestorNameLabel = new Label("- Requestor Name: " + entryForm.getRequestorName());
         requestorNameLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: #333;");
@@ -56,16 +56,28 @@ public class DataDashboard extends Application {
         deceasedNameLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: #333;");
         Label submissionDateLabel = new Label("- Submission Date: " + entryForm.getSubmissionDate());
         submissionDateLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: #333;");
-
-        previewBox.getChildren().addAll(requestIDLabel, requestorNameLabel, requestorCitizenshipLabel, deceasedNameLabel, submissionDateLabel);
+        Label rejectedLabel = new Label("REQUEST HAS BEEN REJECTED");
+        rejectedLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: #FF0000; -fx-font-weight: bold;");
+        Label rejectionReasonLabel = new Label("- Rejection Reason: " + entryForm.getRejectionReason());
+        rejectionReasonLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: #333;");
+        if (entryForm.getRequestStatus().equals("Rejected")) {
+            previewBox.getChildren().addAll(rejectedLabel, rejectionReasonLabel);
+        } else {
+            previewBox.getChildren().addAll(requestIDLabel, requestorNameLabel, requestorCitizenshipLabel, deceasedNameLabel, submissionDateLabel);
+        }
     }
 
     // Method to refresh the ListView with updated data from the database
-    private void refreshQueue(ListView<Entry> queue, ObservableList<Entry> entries) {
+    private void refreshQueue(ListView<Entry> queue, ObservableList<Entry> entries, String selectedFilter, String selectedSort) {
         entries.clear(); // Clear the current entries
         try {
             db.connect();
-            String query = "SELECT * FROM dataqueue";
+            String query;
+            if (selectedFilter.equals("All")) {
+                query = "SELECT * FROM dataqueue ORDER BY " + (selectedSort.equals("Sort by Request ID") ? "requestID" : "submissionDate");
+            } else {
+                query = "SELECT * FROM dataqueue WHERE requestStatus = '" + selectedFilter + "' ORDER BY " + (selectedSort.equals("Sort by Request ID") ? "requestID" : "submissionDate");
+            }
             ResultSet rs = db.executeQuery(query);
             while (rs.next()) {
                 String requestID = rs.getString("requestID");
@@ -74,8 +86,9 @@ public class DataDashboard extends Application {
                 String deceasedName = rs.getString("deceasedName");
                 String requestStatus = rs.getString("requestStatus");
                 String submissionDate = rs.getString("submissionDate");
+                String rejectionReason = rs.getString("rejectionReason"); // Get the rejection reason from the database
 
-                Entry entry = new Entry(requestID, requestorName, requestorCitizenship, deceasedName, requestStatus, submissionDate);
+                Entry entry = new Entry(requestID, requestorName, requestorCitizenship, deceasedName, requestStatus, submissionDate, rejectionReason);
                 entries.add(entry);
             }
         } catch (SQLException e) {
@@ -123,11 +136,23 @@ public class DataDashboard extends Application {
         header.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #333;");
         grid.add(header, 0, 0, 3, 1);
 
+        ComboBox<String> filterComboBox = new ComboBox<>();
+        filterComboBox.getItems().addAll("All", "Pending Data Entry", "Pending Review", "Rejected");
+        filterComboBox.setValue("All"); // Set default value
+        filterComboBox.setPromptText("Filter by Status");
+        String filter = filterComboBox.getValue(); // Get the selected filter value
+
+        ComboBox<String> sortComboBox = new ComboBox<>();
+        sortComboBox.getItems().addAll("Sort by Request ID", "Sort by Submission Date");
+        sortComboBox.setValue("Sort by Request ID"); // Set default value
+        sortComboBox.setPromptText("Sort by");
+        String sort = sortComboBox.getValue(); // Get the selected sort value
+
         ListView<Entry> queue = new ListView<>();
         ObservableList<Entry> entries = FXCollections.observableArrayList();
 
         // Populate the ListView with data from the database
-        refreshQueue(queue, entries);
+        refreshQueue(queue, entries, filter, sort);
 
         grid.add(queue, 0, 1, 2, 1);
 
@@ -154,12 +179,25 @@ public class DataDashboard extends Application {
                     Stage entryStage = new Stage();
                     entryForm.start(entryStage);
                     entryStage.setOnHiding(event -> {
-                        refreshQueue(queue, entries);
+                        refreshQueue(queue, entries, filter, sort); // Refresh the ListView when the entry form is closed
+                        updatePreviewBox(previewBox, entryForm);
                     });
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
             }
+        });
+
+        filterComboBox.setOnAction(e -> {
+            String selectedFilter = filterComboBox.getValue();
+            String selectedSort = sortComboBox.getValue(); // Get the selected sort value
+            refreshQueue(queue, entries, selectedFilter, selectedSort); // Refresh the ListView with filtered entries
+        });
+
+        sortComboBox.setOnAction(e -> {
+            String selectedSort = sortComboBox.getValue();
+            String selectedFilter = filterComboBox.getValue(); // Get the selected filter value
+            refreshQueue(queue, entries, selectedFilter, selectedSort); // Refresh the ListView with sorted entries
         });
 
         Button logout = new Button("Logout");
@@ -172,10 +210,10 @@ public class DataDashboard extends Application {
                 ex.printStackTrace();
             }
         });
-        HBox logoutButtonBox = new HBox(10);
-        logoutButtonBox.setAlignment(Pos.CENTER);
-        logoutButtonBox.getChildren().add(logout);
-        grid.add(logoutButtonBox, 3, 0);
+        HBox buttonBox = new HBox(10);
+        buttonBox.setAlignment(Pos.CENTER_RIGHT);
+        buttonBox.getChildren().addAll(filterComboBox, sortComboBox, logout);
+        grid.add(buttonBox, 1, 0, 3, 1);
 
         Scene scene = new Scene(grid, 800, 600);
         primaryStage.setScene(scene);

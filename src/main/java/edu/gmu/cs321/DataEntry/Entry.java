@@ -1,10 +1,6 @@
 package edu.gmu.cs321.DataEntry;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
-
 import edu.gmu.cs321.DatabaseQuery;
 import javafx.stage.Stage;
 import javafx.application.Application;
@@ -12,7 +8,11 @@ import javafx.scene.Scene;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.geometry.*;
@@ -43,6 +43,7 @@ public class Entry extends Application {
     String submissionDate;
     Boolean isLegible = true;
     String requestReason = null;
+    String rejectionReason;
 
     /**
      * Constructor to initialize the Entry object with the username and role of the user.
@@ -54,13 +55,14 @@ public class Entry extends Application {
      * @param requestStatus The status of the request
      * @param submissionDate The date of submission
      */
-    public Entry(String requestID, String requestorName, String requestorCitizenship, String deceasedName, String requestStatus, String submissionDate) {
+    public Entry(String requestID, String requestorName, String requestorCitizenship, String deceasedName, String requestStatus, String submissionDate, String rejectionReason) {
         this.requestID = requestID;
         this.requestorName = requestorName;
         this.requestorCitizenship = requestorCitizenship;
         this.deceasedName = deceasedName;
         this.requestStatus = requestStatus;
         this.submissionDate = submissionDate;
+        this.rejectionReason = rejectionReason;    
     }
 
     /**
@@ -84,43 +86,45 @@ public class Entry extends Application {
         grid.setPrefSize(800, 600);
 
         //Connect to the database and obtain necessary information
-    DatabaseQuery db = new DatabaseQuery();
-    try {
-        db.connect();
-    } catch (Exception e) {
-        System.out.println("Error connecting to the database: " + e.getMessage());
-    }
-        
-        // Fetch requestor and deceased information from the database
-    try {
-        String requestQuery = "SELECT * FROM dataqueue WHERE requestID = '" + requestID + "'";
-        ResultSet request = db.executeQuery(requestQuery);
-        if (request.next()) {
-            this.relationship = request.getString("relationship");
-            this.requestReason = request.getString("reason");
+        DatabaseQuery db = new DatabaseQuery();
+        try {
+            db.connect();
+        } catch (Exception e) {
+            System.out.println("Error connecting to the database: " + e.getMessage());
         }
-        String requestorQuery = "SELECT * FROM requestors WHERE requestorName = '" + requestorName + "'";
-        ResultSet requestor = db.executeQuery(requestorQuery);
-        if (requestor.next()) {
-            this.requestorID = requestor.getString("requestorID");
-            this.requestorAddress = requestor.getString("requestorAddress");
-            this.requestorCity = requestor.getString("requestorCity");
-            this.requestorState = requestor.getString("requestorState");
-            this.requestorZip = requestor.getString("requestorZip");
-            this.requestorSSN = requestor.getString("requestorSSN");
-            this.requestorPhone = requestor.getString("requestorCell");
-            this.requestorEmail = requestor.getString("requestorEmail");
+
+        try {
+            String getRequestor = "SELECT * FROM requestors WHERE requestorName = '" + this.requestorName + "'";
+            ResultSet rs = db.executeQuery(getRequestor);
+            if (rs.next()) {
+                this.requestorID = rs.getString("requestorID");
+                this.requestorAddress = rs.getString("requestorAddress");
+                this.requestorCity = rs.getString("requestorCity");
+                this.requestorState = rs.getString("requestorState");
+                this.requestorZip = rs.getString("requestorZip");
+                this.requestorCitizenship = rs.getString("requestorCitizenship");
+                this.requestorSSN = rs.getString("requestorSSN");
+                this.requestorPhone = rs.getString("requestorCell");
+                this.requestorEmail = rs.getString("requestorEmail");
+            }
+            String getDeceased = "SELECT * FROM deceased WHERE deceasedName = '" + this.deceasedName + "'";
+            ResultSet rs2 = db.executeQuery(getDeceased);
+            if (rs2.next()) {
+                this.deceasedID = rs2.getString("deceasedID");
+                this.deceasedDOB = rs2.getString("deceasedDOB");
+                this.deceasedSSN = rs2.getString("deceasedSSN");
+            }
+            String getRequest = "SELECT * FROM dataqueue WHERE requestID = '" + this.requestID + "'";
+            ResultSet rs3 = db.executeQuery(getRequest);
+            if (rs3.next()) {
+                this.relationship = rs3.getString("relationship");
+                this.requestStatus = rs3.getString("requestStatus");
+                this.requestReason = rs3.getString("reason");
+                this.isLegible = rs3.getBoolean("isLegible");
+            }
+        } catch (Exception e) {
+            System.out.println("Error retrieving data from the database: " + e.getMessage());
         }
-        String deceasedQuery = "SELECT * FROM deceased WHERE deceasedName = '" + deceasedName + "'";
-        ResultSet deceased = db.executeQuery(deceasedQuery);
-        if (deceased.next()) {
-            this.deceasedID = deceased.getString("deceasedID");
-            this.deceasedDOB = deceased.getString("deceasedDOB");
-            this.deceasedSSN = deceased.getString("deceasedSSN");
-        }
-    } catch (Exception e) {
-        System.out.println("Error connecting to the database: " + e.getMessage());
-    }
         
         ColumnConstraints leftLabelSizes = new ColumnConstraints();
         leftLabelSizes.setPercentWidth(10);
@@ -137,20 +141,21 @@ public class Entry extends Application {
         grid.getColumnConstraints().addAll(leftLabelSizes, leftDeceased, leftFields, rightLabelSizes, rightDeceased, endConstraints);
 
         //record ID
-        Shape rectangle = new Rectangle(600, 50);
+        Shape rectangle = new Rectangle(500, 50);
         rectangle.setFill(Color.LIGHTGRAY);
         grid.add(rectangle, 0, 0, 6, 1);
         Text recordID = new Text(" [Record ID] " + requestID);
         recordID.setFont(Font.font("Verdana", FontWeight.BOLD, 25));
         grid.add(recordID, 0, 0, 4, 1);
 
-        //save and submit buttons
+        //save, reject, and submit buttons
         Button saveButton = new Button("Save");
         Button submitButton = new Button("Submit");
+        Button rejectButton = new Button("Reject");
         HBox hbBtn = new HBox(10);
         hbBtn.setAlignment(Pos.CENTER_RIGHT);
-        hbBtn.getChildren().addAll(saveButton, submitButton);
-        grid.add(hbBtn, 5, 0, 1, 1);
+        hbBtn.getChildren().addAll(rejectButton, saveButton, submitButton);
+        grid.add(hbBtn, 4, 0, 2, 1);
 
         //name
         Label nameLabel = new Label("Name:");
@@ -263,9 +268,108 @@ public class Entry extends Application {
         grid.add(requestReasonField, 2, 11, 4, 1);
 
         final Text actionTarget = new Text();
-        grid.add(actionTarget, 4, 0, 1, 1);
+        grid.add(actionTarget, 3, 0, 1, 1);
         actionTarget.setId("actiontarget");
         actionTarget.setFill(Color.RED);
+
+        Shape notesRectangle = new Rectangle(100, 200);
+        notesRectangle.setFill(Color.LIGHTGRAY);
+        VBox notes = new VBox(10);
+        notes.setAlignment(Pos.CENTER_LEFT);
+        Label notesLabel = new Label("Notes:");
+        notesLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 15));
+        notesLabel.setAlignment(Pos.CENTER_LEFT);
+        Label citizenshipLabel = new Label("");
+        if (!this.requestorCitizenship.equals("citizen")) {
+            citizenshipLabel.setText(this.requestorName + " is not a US Citizen.");
+        }
+        Label legibleLabel = new Label("");
+        if (this.isLegible == false) {
+            legibleLabel.setText(this.requestorName + "'s request is not legible.");
+        }
+        notes.getChildren().addAll(notesLabel, citizenshipLabel, legibleLabel);
+        grid.add(legibleLabel, 3, 4, 3, 3);
+        grid.add(notes, 3, 4, 3, 3);
+
+        //reject button action
+        rejectButton.setOnAction(e -> {
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Reject Confirmation");
+            alert.setHeaderText(null);
+            alert.setContentText("Please provide a reason for rejection:");
+            ComboBox<String> rejectionReasonComboBox = new ComboBox<>();
+            rejectionReasonComboBox.getItems().addAll("Request is Illegible", "Requestor is NOT a U.S. Citizen", "Other");
+            rejectionReasonComboBox.setPromptText("Select Rejection Reason");
+            if (!this.requestorCitizenship.equals("citizen")) {
+                rejectionReasonComboBox.setValue("Requestor is NOT a U.S. Citizen");
+            }
+            if (this.isLegible == false) {
+                rejectionReasonComboBox.setValue("Request is Illegible");
+            }
+            TextField rejectionReasonField = new TextField();
+            rejectionReasonField.setPrefSize(250, 170);
+            rejectionReasonField.setAlignment(Pos.TOP_LEFT);
+            rejectionReasonField.setVisible(false); 
+            rejectionReasonComboBox.setOnAction(event -> {
+                String selectedReason = rejectionReasonComboBox.getValue();
+                if (selectedReason == "Other") {
+                    rejectionReasonField.setVisible(true);
+                    rejectionReasonField.setPromptText("Please specify the reason for rejection.");
+                } else {
+                    rejectionReasonField.setVisible(false);
+                }
+            });
+
+            VBox rejectionInfo = new VBox(10);
+            rejectionInfo.getChildren().addAll(rejectionReasonComboBox, rejectionReasonField);
+            alert.getDialogPane().setContent(rejectionInfo);
+            alert.getDialogPane().setMinHeight(100);
+            alert.getDialogPane().setMinWidth(300);
+            alert.getDialogPane().setPrefSize(300, 200);
+            
+            alert.getDialogPane().getButtonTypes().setAll(ButtonType.OK, ButtonType.CANCEL);
+            alert.showAndWait().ifPresent(response -> {
+                if (response == ButtonType.OK) {
+                    this.requestStatus = "Rejected";
+                    // User clicked OK, proceed with rejection
+                    if (rejectionReasonComboBox.getValue().equals("Other")) {
+                        if (rejectionReasonField.getText() == null) {
+                            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+                            errorAlert.setTitle("Error");
+                            errorAlert.setHeaderText(null);
+                            errorAlert.setContentText("Please provide a reason for rejection.");
+                            errorAlert.showAndWait();
+                        } else {
+                            rejectionReason = rejectionReasonField.getText();
+                            try {
+                                String updateRequests = "UPDATE dataqueue SET requestStatus = 'Rejected', rejectionReason = '" + rejectionReason + "' WHERE requestID = '" + this.requestID + "'";
+                                db.executeUpdate(updateRequests);
+                            } catch (Exception ex) {
+                                System.out.println("Error updating the database: " + ex.getMessage());
+                            }
+                            actionTarget.setText("Request rejected successfully!");
+                            primaryStage.close();
+                        }
+                    } else {
+                        rejectionReason = rejectionReasonComboBox.getValue();
+                        try {
+                            String updateRequests = "UPDATE dataqueue SET requestStatus = 'Rejected', rejectionReason = '" + this.rejectionReason + "' WHERE requestID = '" + this.requestID + "'";
+                            db.executeUpdate(updateRequests);
+                        } catch (Exception ex) {
+                            System.out.println("Error updating the database: " + ex.getMessage());
+                        }
+                        actionTarget.setText("Request rejected successfully!");
+                        primaryStage.close();
+                    }
+                } else if (response == ButtonType.CANCEL) {
+                    // User clicked Cancel or closed the dialog, do nothing
+                    actionTarget.setText("Rejection canceled.");
+                } else {
+                    // User clicked Cancel or closed the dialog, do nothing
+                    actionTarget.setText("Rejection canceled.");
+                }
+            });
+        });
 
         //save button action
         saveButton.setOnAction(e -> {
@@ -302,42 +406,62 @@ public class Entry extends Application {
 
         //submit button action
         submitButton.setOnAction(e -> {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Submission Confirmation");
+            alert.setHeaderText(null);
+            alert.setContentText("Are you sure you want to submit this request for review?");
+            alert.showAndWait().ifPresent(response -> {
+                if (response == ButtonType.OK) {
+                    // User clicked OK, proceed with submission
+                    requestorName = nameTextField.getText();
+                    requestorAddress = addressFieldOne.getText() + " " + addressFieldTwo.getText();
+                    requestorCity = cityField.getText();
+                    requestorState = stateField.getText();
+                    requestorZip = zipField.getText();
+                    requestorSSN = ssnField.getText();
+                    requestorPhone = phoneField.getText();
+                    requestorEmail = emailField.getText();
+                    deceasedName = deceasedNameField.getText();
+                    this.deceasedDOB = deceasedDOBField.getText();
+                    this.deceasedSSN = deceasedSSNField.getText();
+                    relationship = relationshipField.getText();
+                    requestReason = requestReasonField.getText();
+                    this.requestStatus = "Pending Review";
+                    
+                    try {
+                        // Update the database with the new values
+                        String updateRequestor = "UPDATE requestors SET requestorName = '" + requestorName + "', requestorAddress = '" + requestorAddress + "', requestorCity = '" + requestorCity + "', requestorState = '" + requestorState + "', requestorZip = '" + requestorZip + "', requestorSSN = '" + requestorSSN + "', requestorCell = '" + requestorPhone + "', requestorEmail = '" + requestorEmail + "' WHERE requestorID = '" + this.requestorID + "'";
+                        db.executeUpdate(updateRequestor);
 
-            requestorName = nameTextField.getText();
-            requestorAddress = addressFieldOne.getText() + " " + addressFieldTwo.getText();
-            requestorCity = cityField.getText();
-            requestorState = stateField.getText();
-            requestorZip = zipField.getText();
-            requestorSSN = ssnField.getText();
-            requestorPhone = phoneField.getText();
-            requestorEmail = emailField.getText();
-            deceasedName = deceasedNameField.getText();
-            this.deceasedDOB = deceasedDOBField.getText();
-            this.deceasedSSN = deceasedSSNField.getText();
-            relationship = relationshipField.getText();
-            requestReason = requestReasonField.getText();
-            this.requestStatus = "Pending Review";
+                        String updateDeceased = "UPDATE deceased SET deceasedName = '" + deceasedName + "', deceasedDOB = '" + this.deceasedDOB + "', deceasedSSN = '" + this.deceasedSSN + "' WHERE deceasedID = '" + this.deceasedID + "'";
+                        db.executeUpdate(updateDeceased);
+
+                        String updateRequests = "UPDATE dataqueue SET relationship = '" + relationshipField.getText() + "', requestorName = '" + requestorName + "', deceasedName = '" + this.deceasedName + "', reason = '" + requestReason + "', requestStatus = '" + this.requestStatus + "' WHERE requestID = '" + this.requestID + "'";
+                        db.executeUpdate(updateRequests);
+
+                    } catch (Exception ex) {
+                        System.out.println("Error updating the database: " + ex.getMessage());
+                    }
+                    actionTarget.setText("Submitted successfully!");
+                    primaryStage.close();
+                } else {
+                    // User clicked Cancel or closed the dialog, do nothing
+                    actionTarget.setText("Submission pending.");
+                }
+            });
             
-            try {
-                // Update the database with the new values
-                String updateRequestor = "UPDATE requestors SET requestorName = '" + requestorName + "', requestorAddress = '" + requestorAddress + "', requestorCity = '" + requestorCity + "', requestorState = '" + requestorState + "', requestorZip = '" + requestorZip + "', requestorSSN = '" + requestorSSN + "', requestorCell = '" + requestorPhone + "', requestorEmail = '" + requestorEmail + "' WHERE requestorID = '" + this.requestorID + "'";
-                db.executeUpdate(updateRequestor);
-
-                String updateDeceased = "UPDATE deceased SET deceasedName = '" + deceasedName + "', deceasedDOB = '" + this.deceasedDOB + "', deceasedSSN = '" + this.deceasedSSN + "' WHERE deceasedID = '" + this.deceasedID + "'";
-                db.executeUpdate(updateDeceased);
-
-                String updateRequests = "UPDATE dataqueue SET relationship = '" + relationshipField.getText() + "', requestorName = '" + requestorName + "', deceasedName = '" + this.deceasedName + "', reason = '" + requestReason + "', requestStatus = '" + this.requestStatus + "' WHERE requestID = '" + this.requestID + "'";
-                db.executeUpdate(updateRequests);
-
-            } catch (Exception ex) {
-                System.out.println("Error updating the database: " + ex.getMessage());
-            }
-            primaryStage.close();
         });
 
         Scene scene = new Scene(grid, 800, 570);
         primaryStage.setScene(scene);
         primaryStage.show();
+        primaryStage.setOnHiding(event -> {
+            try {
+                db.close(); // Ensure the database connection is closed
+            } catch (Exception e) {
+                System.out.println("Error closing the database connection: " + e.getMessage());
+            }
+        });
     }
     
     /**
@@ -394,9 +518,18 @@ public class Entry extends Application {
         return submissionDate;
     }
 
+    /**
+     * Method to get the rejection reason.
+     * 
+     * @return the rejection reason
+     */
+    public String getRejectionReason() {
+        return rejectionReason;
+    }
+
     @Override
     public String toString() {
-        return "[Request " + requestID + "] "+ requestorName +" (" + requestStatus + "}";
+        return "[Request " + requestID + "] "+ requestorName +" (" + requestStatus + ") - " + submissionDate;
     }
 
     /**
