@@ -77,7 +77,6 @@ public class Entry extends Application {
         ColumnConstraints endConstraints = new ColumnConstraints();
         endConstraints.setPercentWidth(30);
         grid.getColumnConstraints().addAll(leftLabelSizes, leftDeceased, leftFields, rightLabelSizes, rightDeceased, endConstraints);
-        
 
         //record ID
         Shape rectangle = new Rectangle(600, 50);
@@ -100,6 +99,13 @@ public class Entry extends Application {
         hbBtn2.setAlignment(Pos.CENTER_RIGHT);
         hbBtn2.getChildren().add(submitButton);
         grid.add(hbBtn2, 5, 0, 1, 1);
+
+        //submit button action
+        submitButton.setOnAction(e -> {
+            // Handle the submit action here
+            System.out.println("Submit button clicked!");
+            // You can add your logic to save the data to the database or perform any other action
+        });
 
         //name
         Label nameLabel = new Label("Name:");
@@ -194,6 +200,23 @@ public class Entry extends Application {
         requestReasonField.setPrefHeight(100);
         requestReasonField.setAlignment(Pos.TOP_LEFT);
         grid.add(requestReasonField, 2, 11, 4, 1);
+
+        //save button action
+        saveButton.setOnAction(e -> {
+            String newName = nameTextField.getText();
+            String newAddress = addressFieldOne.getText() + " " + addressFieldTwo.getText() + " " + cityField.getText() + " " + stateField.getText() + " " + zipField.getText();
+            String newSSN = ssnField.getText();
+            String newPhone = phoneField.getText();
+            String newEmail = emailField.getText();
+            String newDeceasedName = deceasedNameField.getText();
+            String newDeceasedDOB = deceasedDOBField.getText();
+            String newDeceasedSSN = deceasedSSNField.getText();
+            String newRelationship = relationshipField.getText();
+            String newRequestReason = requestReasonField.getText();
+
+            
+
+        });
 
         Scene scene = new Scene(grid, 800, 570);
         primaryStage.setScene(scene);
