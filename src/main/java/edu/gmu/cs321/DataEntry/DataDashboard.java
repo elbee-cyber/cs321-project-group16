@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import edu.gmu.cs321.DatabaseQuery;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Scene;
@@ -59,6 +60,30 @@ public class DataDashboard extends Application {
         previewBox.getChildren().addAll(requestIDLabel, requestorNameLabel, requestorCitizenshipLabel, deceasedNameLabel, submissionDateLabel);
     }
 
+    // Method to refresh the ListView with updated data from the database
+    private void refreshQueue(ListView<Entry> queue, ObservableList<Entry> entries) {
+        entries.clear(); // Clear the current entries
+        try {
+            db.connect();
+            String query = "SELECT * FROM dataqueue";
+            ResultSet rs = db.executeQuery(query);
+            while (rs.next()) {
+                String requestID = rs.getString("requestID");
+                String requestorName = rs.getString("requestorName");
+                String requestorCitizenship = rs.getString("requestorCitizenship");
+                String deceasedName = rs.getString("deceasedName");
+                String requestStatus = rs.getString("requestStatus");
+                String submissionDate = rs.getString("submissionDate");
+
+                Entry entry = new Entry(requestID, requestorName, requestorCitizenship, deceasedName, requestStatus, submissionDate);
+                entries.add(entry);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        queue.setItems(entries); // Update the ListView with new entries
+    }
+
     /**
      * Method to start the JavaFX application and set up the main dashboard UI.
      * @param primaryStage the primary stage for this application
@@ -102,26 +127,8 @@ public class DataDashboard extends Application {
         ObservableList<Entry> entries = FXCollections.observableArrayList();
 
         // Populate the ListView with data from the database
-        try {
-            db.connect();
-            String query = "SELECT * FROM dataqueue";
-            ResultSet rs = db.executeQuery(query);
-            while (rs.next()) {
-                String requestID = rs.getString("requestID");
-                String requestorName = rs.getString("requestorName");
-                String requestorCitizenship = rs.getString("requestorCitizenship");
-                String deceasedName = rs.getString("deceasedName");
-                String requestStatus = rs.getString("requestStatus");
-                String submissionDate = rs.getString("submissionDate");
+        refreshQueue(queue, entries);
 
-                Entry entry = new Entry(requestID, requestorName, requestorCitizenship, deceasedName, requestStatus, submissionDate);
-                entries.add(entry);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        queue.setItems(entries);
         grid.add(queue, 0, 1, 2, 1);
 
         // Vbox to hold the preview of the selected entry
@@ -144,7 +151,11 @@ public class DataDashboard extends Application {
             if (e.getClickCount() == 2) {
                 // Open the entry form in a new window
                 try {
-                    entryForm.start(new Stage());
+                    Stage entryStage = new Stage();
+                    entryForm.start(entryStage);
+                    entryStage.setOnHiding(event -> {
+                        refreshQueue(queue, entries);
+                    });
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }

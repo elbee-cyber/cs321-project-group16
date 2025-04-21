@@ -16,7 +16,7 @@ public class DatabaseQuery {
     // Database connection details
     private final String url = "jdbc:mysql://localhost:3306/cs321";
     private final String user = "root";
-    private final String pass = "Quang$2001";
+    private final String pass = "cs321";
     private Connection connection;
 
     /**
@@ -40,7 +40,6 @@ public class DatabaseQuery {
 
             "UPDATE users SET password = '9f3a5e0bdcaa80985b2a03c62203fc1ea761433ac63b0042da4f5f250166c1d0' WHERE userid = 3;",
             "UPDATE users SET username = 'approver' WHERE userid = 3;",
-        
 
 
             /**
@@ -52,9 +51,6 @@ public class DatabaseQuery {
             "DROP TABLE IF EXISTS reviewqueue",
             "DROP TABLE IF EXISTS reviewpapers",
             "DROP TABLE IF EXISTS users",
-            "DROP TABLE IF EXISTS dataqueue",
-            "DROP TABLE IF EXISTS requestors",
-            "DROP TABLE IF EXISTS deceased",
             "SET FOREIGN_KEY_CHECKS = 1",
 
             /**
@@ -70,10 +66,10 @@ public class DatabaseQuery {
             "CREATE TABLE IF NOT EXISTS reviewqueue (queue_id INT PRIMARY KEY AUTO_INCREMENT, userid INT NOT NULL, paper_id INT NOT NULL, status VARCHAR(255) NOT NULL, date DATE NOT NULL, FOREIGN KEY (userid) REFERENCES users(userid), FOREIGN KEY (paper_id) REFERENCES reviewpapers(paper_id))",
 
             //Data Entry
-            "CREATE TABLE IF NOT EXISTS dataqueue (requestID INT PRIMARY KEY NOT NULL, requestorName VARCHAR(255) NOT NULL, requestorCitizenship VARCHAR(255) NOT NULL, deceasedName VARCHAR(255) NOT NULL, isLegible BOOL NOT NULL, requestStatus VARCHAR(255) NOT NULL, submissionDate DATE NOT NULL)",
+            "CREATE TABLE IF NOT EXISTS dataqueue (requestID INT PRIMARY KEY NOT NULL, requestorName VARCHAR(255) NOT NULL, requestorCitizenship VARCHAR(255) NOT NULL, deceasedName VARCHAR(255) NOT NULL, isLegible BOOL NOT NULL, requestStatus VARCHAR(255) NOT NULL, submissionDate DATE NOT NULL, relationship VARCHAR(255) NOT NULL, reason VARCHAR(255))",
 
             //Requestors
-            "CREATE TABLE IF NOT EXISTS requestors (requestorID INT PRIMARY KEY AUTO_INCREMENT, requestorName VARCHAR(255) NOT NULL, requestorAddress VARCHAR(255) NOT NULL, requestorCitizenship VARCHAR(255) NOT NULL, requestorSSN VARCHAR(255) NOT NULL, requestorCell VARCHAR(255) NOT NULL, requestorEmail VARCHAR(255) NOT NULL)",
+            "CREATE TABLE IF NOT EXISTS requestors (requestorID INT PRIMARY KEY AUTO_INCREMENT, requestorName VARCHAR(255) NOT NULL, requestorAddress VARCHAR(255) NOT NULL, requestorCity VARCHAR(255) NOT NULL, requestorState VARCHAR(255) NOT NULL, requestorZip VARCHAR(255) NOT NULL, requestorCitizenship VARCHAR(255) NOT NULL, requestorSSN VARCHAR(255) NOT NULL, requestorCell VARCHAR(255) NOT NULL, requestorEmail VARCHAR(255) NOT NULL)",
 
             //Deceased
             "CREATE TABLE IF NOT EXISTS deceased (deceasedID INT PRIMARY KEY AUTO_INCREMENT, deceasedName VARCHAR(255) NOT NULL, deceasedDOB DATE NOT NULL, deceasedSSN VARCHAR(255) NOT NULL)",
@@ -88,7 +84,7 @@ public class DatabaseQuery {
         //populate data queue from request.csv
         try (BufferedReader br = new BufferedReader(new FileReader("src/main/java/edu/gmu/cs321/requests.csv"))) {
             String line;
-            String query = "INSERT IGNORE INTO dataqueue (requestID, requestorName, requestorCitizenship, deceasedName, isLegible, requestStatus, submissionDate) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            String query = "INSERT IGNORE INTO dataqueue (requestID, requestorName, requestorCitizenship, deceasedName, isLegible, requestStatus, submissionDate, relationship) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
             PreparedStatement pstmt = connection.prepareStatement(query);
             br.readLine(); // Skip the header line
             while ((line = br.readLine()) != null) {
@@ -108,11 +104,11 @@ public class DatabaseQuery {
         } catch (IOException | SQLException e) {
             e.printStackTrace();
         }
-        /*
+        
         //populate requestors from living.csv
         try (BufferedReader br = new BufferedReader(new FileReader("src/main/java/edu/gmu/cs321/living.csv"))) {
             String line;
-            String query = "INSERT IGNORE INTO requestors (requestorName, requestorAddress, requestorCitizenship, requestorSSN, requestorCell, requestorEmail) VALUES (?, ?, ?, ?, ?, ?)";
+            String query = "INSERT IGNORE INTO requestors (requestorName, requestorAddress, requestorCity, requestorState, requestorZip, requestorCitizenship, requestorSSN, requestorCell, requestorEmail) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
             PreparedStatement pstmt = connection.prepareStatement(query);
             br.readLine(); // Skip the header line
             while ((line = br.readLine()) != null) {
@@ -147,7 +143,7 @@ public class DatabaseQuery {
         } catch (IOException | SQLException e) {
             e.printStackTrace();
         }
-            */
+            
         return this.connection;
     }
 
@@ -229,7 +225,5 @@ public class DatabaseQuery {
         String query = "SELECT * FROM reviewpapers";
         return executeQuery(query);
     }
-
-
 
 }
