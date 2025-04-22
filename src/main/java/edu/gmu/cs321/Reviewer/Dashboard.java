@@ -1,6 +1,9 @@
 package edu.gmu.cs321.Reviewer;
-
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.cs321.Workflow;
 
 import edu.gmu.cs321.DatabaseQuery;
 import javafx.geometry.Insets;
@@ -20,7 +23,6 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-
 /**
  * Reviewer Dashboard instance with the specified user details and database connection.
  *
@@ -30,31 +32,36 @@ import javafx.stage.Stage;
  * @param db              The database query object used for executing queries.
  */
 public class Dashboard {
+    // Database connection
+    private DatabaseQuery db;
+
+    // Workflow instance
+    private Workflow workflow;
+
     // Current user data + DB conn (passed from login)
     private Integer currentUserId;
     private String currentUserRole;
     private String currentUser;
-    private DatabaseQuery db;
 
     // Queue items currently displayed in top bar
-    private Integer[] queue_ids;
+    private List<Integer> queue_ids;
+    private int queueLBound = 0;
+    private int queueHBound = 5;
 
     // Selected top bar item
-    private Integer selectedQueueId = 0;
+    private Integer selectedFormID = 0;
 
     // Used to record indexes for arrow navigation
     private Integer leftMostItem = 0;
     private Integer rightMostItem = -1;
 
     // Selected top bar item sort
-    private String topbarSortDate = "date ASC";
-    private String topbarSortStatus = "status = 'unreviewed'";
+    private String topbarSortDate = "created_at DESC";
 
     // Topbar buttons
     private Button leftArrowButton = new Button("<");
     private Button rightArrowButton = new Button(">");
     private ComboBox<String> dateFilter = new ComboBox<>();
-    private ComboBox<String> statusFilter = new ComboBox<>();
 
     // Form view items
     private TextField nameField = new TextField("Placeholder");
@@ -96,6 +103,8 @@ public class Dashboard {
         this.currentUserRole = currentUserRole;
         this.currentUser = currentUser;
         this.db = db;
+        this.workflow = db.getWorkflow();
+        this.queue_ids = new ArrayList<>();
     }
 
     /**
@@ -105,30 +114,30 @@ public class Dashboard {
      * @return An array of strings representing the queue data (dates).
      */
     private String[] getQueueData(Boolean clickedLeft, Boolean clickedRight) {
-        String[] results = new String[10];
-        this.queue_ids = new Integer[10];
+        String[] results = new String[5];
 
-        // SQL query to get the queue data based on the current filters and navigation buttons
-        String query = "SELECT * FROM reviewqueue WHERE " + this.topbarSortStatus + " ORDER BY " + this.topbarSortDate + " LIMIT 10";
+        String query = "SELECT form_id, created_at FROM workflow_records WHERE next_step='Review' ORDER BY " + this.topbarSortDate;
         if (clickedLeft) {
-            query = "SELECT * FROM reviewqueue WHERE queue_id < " + this.leftMostItem + " AND " + this.topbarSortStatus + " ORDER BY " + this.topbarSortDate + " LIMIT 10";
+            query = "SELECT form_id, created_at FROM workflow_records WHERE next_step='Review' AND form_id < " + this.leftMostItem + " ORDER BY " + this.topbarSortDate;
         } else if (clickedRight) {
-            query = "SELECT * FROM reviewqueue WHERE queue_id > " + this.rightMostItem + " AND " + this.topbarSortStatus + " ORDER BY " + this.topbarSortDate + " LIMIT 10";
+            query = "SELECT form_id, created_at FROM workflow_records WHERE next_step='Review' AND form_id > " + this.rightMostItem + " ORDER BY " + this.topbarSortDate;
         }
 
         // Execute the query and populate the results array
         try {
             ResultSet rs = db.executeQuery(query);
+
+            // Check if the result set is empty
+            if (rs == null){
+                return getQueueData(false, false);
+            }
+            this.leftMostItem = this.queue_ids.get(this.queueLBound);
+            this.rightMostItem = this.queue_ids.get(this.queueHBound);
             int i = 1;
             while (rs.next()){
-                results[i-1] = rs.getDate("date").toLocalDate().toString();
-                this.queue_ids[i-1] = rs.getInt("queue_id");
+                results[i-1] = rs.getTimestamp("created_at").toString();
+                this.queue_ids.add(this.workflow.GetNextWFItem("Review"));
                 // Set the leftMostItem and rightMostItem based on the current index
-                if (i == 1) {
-                    this.leftMostItem = this.queue_ids[i-1];
-                    this.selectedQueueId = this.queue_ids[i-1];
-                }
-                this.rightMostItem = this.queue_ids[i-1];
                 i++;
             }
         } catch (Exception e) {
@@ -152,9 +161,9 @@ public class Dashboard {
         for(String date: queueDates) {
             if (date != null) {
                 Button dateButton = new Button(date);
-                Integer queueId = this.queue_ids[i];
+                Integer queueId = this.queue_ids.get(i);
                 dateButton.setOnAction(e -> {
-                    this.selectedQueueId = queueId;
+                    this.selectedFormID = queueId;
                     selectQueueItem();
                 });
                 dateBar.getChildren().add(dateButton);
@@ -164,7 +173,6 @@ public class Dashboard {
         dateBar.getChildren().add(0, this.leftArrowButton);
         dateBar.getChildren().add(this.rightArrowButton);
         dateBar.getChildren().add(this.dateFilter);
-        dateBar.getChildren().add(this.statusFilter);
     }
 
     /**
@@ -172,11 +180,15 @@ public class Dashboard {
      * This method is called when a queue item is selected from the top bar.
      */
     private void selectQueueItem() {
-        this.paperidLabel.setText("Reviewing Paper ID: " + this.selectedQueueId + "           ");
+        this.paperidLabel.setText("Reviewing Form ID: " + this.selectedFormID + "           ");
         clearCheckedItems(); // Clear previous selections
 
         // Update navigation keys if we are resting on a bound
         int minQueueId = getBoundedQueueId(0);
+        System.out.println("Min Queue ID: " + minQueueId);
+        System.out.println("Left Most Item: " + this.leftMostItem);
+        System.out.println("Right Most Item: " + this.rightMostItem);
+        System.out.println("Max Queue ID: " + getBoundedQueueId(1));
         if (this.leftMostItem == minQueueId) {
             this.leftArrowButton.setDisable(true);
         } else {
@@ -190,22 +202,22 @@ public class Dashboard {
         }
         try {
             // Query to get the reviewpaper details based on the selected queue item
-            String query = "SELECT rp.* FROM reviewpapers rp INNER JOIN reviewqueue rq ON rp.paper_id = rq.paper_id WHERE rq.queue_id = " + this.selectedQueueId;
+            String query = "SELECT * FROM requestData WHERE formID=" + this.selectedFormID;
 
             ResultSet rs = db.executeQuery(query);
             if (rs.next()) {
                 // Populate the form fields with the retrieved data
                 // paper_id, name, ssn, address, cell, email, deceasedname, deceasedDOB, deceasedSSN, deceasedrela, reason
-                this.nameField.setText(rs.getString("name"));
-                this.addressArea.setText(rs.getString("address"));
-                this.ssnField.setText(rs.getString("ssn"));
-                this.cellField.setText(rs.getString("cell"));
-                this.emailField.setText(rs.getString("email"));
-                this.deceasedNameField.setText(rs.getString("deceasedname"));
+                this.nameField.setText(rs.getString("requestorName"));
+                this.addressArea.setText(rs.getString("requestorAddress"));
+                this.ssnField.setText(rs.getString("requestorSSN"));
+                this.cellField.setText(rs.getString("requestorCell"));
+                this.emailField.setText(rs.getString("requestorEmail"));
+                this.deceasedNameField.setText(rs.getString("deceasedName"));
                 this.deceasedDOBField.setText(rs.getString("deceasedDOB"));
                 this.deceasedSSNField.setText(rs.getString("deceasedSSN"));
-                this.deceasedRelaField.setText(rs.getString("deceasedrela"));
-                this.reasonReqArea.setText(rs.getString("reason"));
+                this.deceasedRelaField.setText(rs.getString("deceasedRelationship"));
+                this.reasonReqArea.setText(rs.getString("requestReason"));
                 this.commentsArea.clear();
             } else {
                 System.out.println("No data found for the selected queue item.");
@@ -249,14 +261,19 @@ public class Dashboard {
         int bound = -1;
         String query;
         if (isMax == 1){
-            query = "SELECT MAX(queue_id) AS bound FROM reviewqueue WHERE " + this.topbarSortStatus;
+            query = "SELECT MAX(form_id) AS bound FROM workflow_records";
         }else{
-            query = "SELECT MIN(queue_id) AS bound FROM reviewqueue WHERE " + this.topbarSortStatus;
+            query = "SELECT MIN(form_id) AS bound FROM workflow_records";
         }
         try {
             ResultSet rs = db.executeQuery(query);
             if (rs.next()) {
                 bound = rs.getInt("bound");
+                if (isMax == 1){
+                    bound += 5;
+                }else{
+                    bound -= 5;
+                }
             }
         } catch (Exception e) {
             System.out.println("Error retrieving max queue_id: " + e.getMessage());
@@ -298,31 +315,14 @@ public class Dashboard {
         });
 
         // Date filter
-        this.dateFilter.getItems().addAll("Date (ASC)", "Date (DESC)");
-        this.dateFilter.setValue("Date (ASC)");
+        this.dateFilter.getItems().addAll("Date (DESC)", "Date (ASC)");
+        this.dateFilter.setValue("Date (DESC)");
         this.dateFilter.setOnAction(e -> {
             String selectedFilter = this.dateFilter.getValue();
             if (selectedFilter.equals("Date (ASC)")) {
                 this.topbarSortDate = "date ASC";
             } else if (selectedFilter.equals("Date (DESC)")) {
                 this.topbarSortDate = "date DESC";
-            }
-            updateQueueData(dateBar, false, false);
-        });
-
-        // Status filter
-        this.statusFilter.getItems().addAll("Unreviewed", "Forwarded", "Rejected", "All");
-        this.statusFilter.setValue("Unreviewed");
-        this.statusFilter.setOnAction(e -> {
-            String selectedFilter = this.statusFilter.getValue();
-            if (selectedFilter.equals("Unreviewed")) {
-                this.topbarSortStatus = "status = 'unreviewed'";
-            } else if (selectedFilter.equals("Forwarded")) {
-                this.topbarSortStatus = "status = 'forwarded'";
-            } else if (selectedFilter.equals("Rejected")) {
-                this.topbarSortStatus = "status = 'rejected'";
-            } else if (selectedFilter.equals("All")) {
-                this.topbarSortStatus = "1=1"; // no filter
             }
             updateQueueData(dateBar, false, false);
         });
@@ -560,13 +560,8 @@ public class Dashboard {
                 failAlert.showAndWait();
             } else {
                 try {
-                    // Update the selected queue item to have a status of 'rejected'
-                    String updateQuery = "UPDATE reviewqueue SET status = 'rejected' WHERE queue_id = " + this.selectedQueueId;
-                    db.executeUpdate(updateQuery);
-
-                    // Insert a row into the rejectedpapers table with the selected queue item and comment
-                    String query = "INSERT INTO rejectedpapers (queue_id, comment) VALUES (?, ?)";
-                    db.executePUpdate(query, this.selectedQueueId, commentsArea.getText());
+                    // Send back to DataEntry for resubmission
+                    this.workflow.AddWFItem(this.selectedFormID,"DataEntry");
 
                     // Show success alert
                     Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
@@ -592,10 +587,7 @@ public class Dashboard {
                 if (response == ButtonType.OK) {
                     try {
                         // Update the selected queue item to have a status of 'Forwarded'
-                        String updateQuery = "UPDATE reviewqueue SET status = 'forwarded' WHERE queue_id = " + this.selectedQueueId;
-                        db.executeUpdate(updateQuery);
-
-                        // Implement logic to update Approval's table here
+                        this.workflow.AddWFItem(this.selectedFormID,"Approve");
 
                         // Show success alert
                         Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
