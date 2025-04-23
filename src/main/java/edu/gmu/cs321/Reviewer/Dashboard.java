@@ -88,6 +88,9 @@ public class Dashboard {
     // Keeps track of number of checked items
     private int checkedCount = 0;
 
+    // Last sort order
+    private String lastSortOrder = "ASC";
+
     /**
      * Constructor for the Dashboard class.
      */
@@ -122,8 +125,7 @@ public class Dashboard {
                 this.workflow.GetNextWFItem("Review");
             }
         } catch (Exception e) {
-            System.out.println("Error: " +e.getMessage());
-            return null;
+            System.out.println("Error Date set: " +e.getMessage());
         }
 
         // Bounds sanity check for left and right indexes
@@ -133,7 +135,7 @@ public class Dashboard {
         }
         if (this.leftIndex < 0) {
             this.leftIndex = 0;
-            this.rightIndex = 4;
+            this.rightIndex = this.form_ids.size()-1;
         }
 
         String[] results = new String[5];
@@ -158,6 +160,15 @@ public class Dashboard {
     private void updateQueueData(HBox dateBar) {
         String[] queueDates = getQueueData();
         dateBar.getChildren().clear(); // Clear previous buttons
+
+        // Adjust bounds to avoid out-of-bounds errors
+        if (this.leftIndex < 0) {
+            this.leftIndex = 0;
+        }
+        if (this.rightIndex >= this.form_ids.size()) {
+            this.rightIndex = this.form_ids.size() - 1;
+        }
+
         int i = this.leftIndex;
         for(String date: queueDates) {
             if (date != null) {
@@ -218,7 +229,7 @@ public class Dashboard {
                 System.out.println("No data found for the selected queue item.");
             }
         } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
+            System.out.println("Error requestData: " + e.getMessage());
         }
     }
 
@@ -289,9 +300,13 @@ public class Dashboard {
         });
 
         // Date filter
-        this.dateFilter.getItems().addAll("Date (ASC)", "Date (DESC)");
-        this.dateFilter.setValue("Date (ASC)");
+        this.dateFilter.getItems().addAll("ASC", "DESC");
+        this.dateFilter.setValue("ASC");
         this.dateFilter.setOnAction(e -> {
+            if (this.dateFilter.getValue().equals(this.lastSortOrder)) {
+                return; // No change in filter, do nothing
+            }
+            this.lastSortOrder = this.dateFilter.getValue();
             Collections.reverse(this.form_ids);
             updateQueueData(dateBar);
         });
@@ -527,22 +542,22 @@ public class Dashboard {
             } else {
                 try {
                     // Remove item
-                    this.form_item.remove(this.selectedQueueId);
-                    this.form_ids.remove(this.selectedQueueId);
+                    this.form_item.entrySet().removeIf(entry -> entry.getKey().equals(this.selectedQueueId));
+                    this.form_ids.removeIf(id -> id.equals(this.selectedQueueId));
 
                     // !!Implement logic to email the requestor with the rejection reason here!!
 
+                    // Refresh the queue data
+                    updateQueueData(dateBar);
+                    
                     // Show success alert
                     Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
                     successAlert.setTitle("Rejection Successful");
                     successAlert.setHeaderText("Rejection Successful");
                     successAlert.setContentText("The paper has been marked as rejected and the comment has been recorded.");
                     successAlert.showAndWait();
-
-                    // Refresh the queue data
-                    updateQueueData(dateBar);
                 } catch (Exception ex) {
-                    System.out.println("Error: " +ex.getMessage());
+                    System.out.println("Error Reject: " +ex.getMessage());
                 }
             }
         });
@@ -558,12 +573,15 @@ public class Dashboard {
                     try {
                         // Update the selected queue item to have a status of 'Forwarded'
                         this.workflow.AddWFItem(this.selectedQueueId, "Approve");
-                        this.form_item.remove(this.selectedQueueId);
-                        this.form_ids.remove(this.selectedQueueId);
+                        this.form_item.entrySet().removeIf(entry -> entry.getKey().equals(this.selectedQueueId));
+                        this.form_ids.removeIf(id -> id.equals(this.selectedQueueId));
 
                         // Update the corresponding request with Reviewer edits
                         String query = "UPDATE requestData SET requestorName=?, requestorAddress=?, requestorSSN=?, requestorCell=?, requestorEmail=?, deceasedName=?, deceasedDOB=?, deceasedSSN=?, deceasedRelationship=?, requestReason=? WHERE formID=" + this.selectedQueueId.toString();
                         db.executePUpdate(query, this.nameField.getText(), this.addressArea.getText(), this.ssnField.getText(), this.cellField.getText(), this.emailField.getText(), this.deceasedNameField.getText(), this.deceasedDOBField.getText(), this.deceasedSSNField.getText(), this.deceasedRelaField.getText(), this.reasonReqArea.getText());
+
+                        // Refresh the queue data
+                        updateQueueData(dateBar);
 
                         // Show success alert
                         Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
@@ -571,11 +589,9 @@ public class Dashboard {
                         successAlert.setHeaderText("Approval Successful");
                         successAlert.setContentText("The paper has been forwarded for approval.");
                         successAlert.showAndWait();
-
-                        // Refresh the queue data
-                        updateQueueData(dateBar);
                     } catch (Exception ex) {
-                        System.out.println("Error: " + ex.getMessage());
+                        System.out.println("Error Approve: " + ex.getMessage());
+                        ex.printStackTrace();
                     }
                 }
             });
