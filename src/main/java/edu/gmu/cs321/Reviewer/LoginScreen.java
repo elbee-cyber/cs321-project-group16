@@ -16,31 +16,39 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
-
+/**
+ * LoginScreen class represents the login screen for the Reviewer role in the application.
+ * It allows users to enter their username and password and finds the user in the database where SHA256(password) = password.
+    * If the credentials are valid, it opens the ReviewerDashboard.
+    * If the credentials are invalid, it shows an error alert.
+ */
 public class LoginScreen extends Application {
 
+    /**
+     * Sets up the primary stage and displays the login screen.
+     *
+     * @param primaryStage the primary stage for this application
+     */
     @Override
     public void start(Stage primaryStage) {
-        
         primaryStage.setTitle("Login Screen");
-
-        // gridpane layout
         GridPane grid = new GridPane();
         grid.setAlignment(Pos.CENTER);
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setPadding(new Insets(25, 25, 25, 25));
 
-        // for failure alerts (just login right now)
+        // For failure alerts (just login right now)
         Alert failAlert = new Alert(Alert.AlertType.ERROR);
 
         // db connection
         DatabaseQuery db = new DatabaseQuery();
-        try{
+        try {
             db.connect();
-        }catch(java.sql.SQLException e){
+        } catch (java.sql.SQLException e) {
             e.printStackTrace();
             failAlert.setTitle("Database Connection Failed");
             failAlert.setHeaderText("Database Connection Failed");
@@ -48,7 +56,6 @@ public class LoginScreen extends Application {
             failAlert.showAndWait();
             return;
         }
-        
 
         Label headingLabel = new Label("Reviewer Dashboard");
         headingLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
@@ -72,17 +79,54 @@ public class LoginScreen extends Application {
         Button loginButton = new Button("Login");
         grid.add(loginButton, 1, 4);
 
-        // login button action
+        // "Forgot Password" clickable label
+        Text forgotPassword = new Text("Forgot Password?");
+        forgotPassword.setStyle("-fx-underline: true; -fx-text-fill: blue; -fx-cursor: hand;");
+        grid.add(forgotPassword, 1, 5);
+
+        // Forgot Password action
+        forgotPassword.setOnMouseClicked(event -> {
+            Stage forgotPasswordStage = new Stage();
+            forgotPasswordStage.setTitle("Forgot Password");
+
+            GridPane forgotPasswordGrid = new GridPane();
+            forgotPasswordGrid.setAlignment(Pos.CENTER);
+            forgotPasswordGrid.setHgap(10);
+            forgotPasswordGrid.setVgap(10);
+            forgotPasswordGrid.setPadding(new Insets(25, 25, 25, 25));
+
+            Label emailLabel = new Label("Enter your email:");
+            forgotPasswordGrid.add(emailLabel, 0, 0);
+
+            TextField emailField = new TextField();
+            forgotPasswordGrid.add(emailField, 1, 0);
+
+            Button resetButton = new Button("Reset Password");
+            forgotPasswordGrid.add(resetButton, 1, 1);
+
+            resetButton.setOnAction(closeEvent -> {
+                String email = emailField.getText();
+
+                // !!Implement logic to email password reset!!
+
+                forgotPasswordStage.close();
+            });
+
+            Scene forgotPasswordScene = new Scene(forgotPasswordGrid, 300, 200);
+            forgotPasswordStage.setScene(forgotPasswordScene);
+            forgotPasswordStage.show();
+        });
+
         loginButton.setOnAction(event -> {
             String username = userTextField.getText();
             String password = pwBox.getText();
             String hashedPassword;
-            
+
             Integer currentUserId;
             String currentUserRole;
             String currentUser;
 
-            // try to hash the input password
+            // Try to hash the input password
             try {
                 MessageDigest digest = MessageDigest.getInstance("SHA-256");
                 byte[] hash = digest.digest(password.getBytes(StandardCharsets.UTF_8));
@@ -91,26 +135,26 @@ public class LoginScreen extends Application {
                     hashedPassword += String.format("%02x", b);
                 }
             } catch (java.security.NoSuchAlgorithmException e) {
-                failAlert.setTitle("Error occured!");
-                failAlert.setHeaderText("Error occured!");
+                failAlert.setTitle("Error occurred!");
+                failAlert.setHeaderText("Error occurred!");
                 failAlert.setContentText("Please try again.");
                 failAlert.showAndWait();
                 return;
             }
 
-            // check that there is a row for username and hash(password)
+            // Confirm that there is a row for username and hash(password) where role = 'reviewer'
             try {
                 String query = "SELECT * FROM users WHERE username = ? and password = ? and role = 'reviewer'";
                 ResultSet rs = db.executePQuery(query, username, hashedPassword);
 
-                if(!rs.next())
+                if (!rs.next())
                     throw new java.sql.SQLException();
 
                 currentUserId = rs.getInt("userid");
                 currentUserRole = rs.getString("role");
                 currentUser = rs.getString("username");
             } catch (java.sql.SQLException e) {
-                e.printStackTrace();
+                System.out.println("Error: " + e.getMessage());
                 failAlert.setTitle("Invalid credentials!");
                 failAlert.setHeaderText("Invalid credentials!");
                 failAlert.setContentText("Please try again.");
@@ -118,15 +162,13 @@ public class LoginScreen extends Application {
                 return;
             }
 
-            // code to select username from the ResultsSet and open ReviewerDashboard
+            // Open Dashboard with the current session info
             primaryStage.hide();
             Dashboard dashboard = new Dashboard(currentUserId, currentUserRole, currentUser, db);
             dashboard.startScreen(primaryStage);
         });
 
-        // scene
         Scene scene = new Scene(grid);
-        //primaryStage.setMaximized(true);
         primaryStage.setScene(scene);
         primaryStage.show();
     }
