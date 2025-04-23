@@ -1,6 +1,8 @@
 package edu.gmu.cs321.DataEntry;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
+
 import edu.gmu.cs321.DatabaseQuery;
 import javafx.stage.Stage;
 import javafx.application.Application;
@@ -23,15 +25,13 @@ import javafx.scene.shape.Shape;
 
 // This class represents the main entry form for data entry, allowing users to input and manage data related to deceased individuals.
 public class Entry extends Application {
-    String requestID;
-    String requestorID = null;
-    String deceasedID = null;
+    int requestID;
     String requestorName;
-    String requestorAddress = null;
+    String requestorStreet = null;
     String requestorCity = null;
     String requestorState = null;
     String requestorZip = null;
-    String requestorCitizenship;
+    Boolean requestorCitizenship;
     String requestorSSN = null;
     String requestorPhone = null;
     String requestorEmail = null;
@@ -44,6 +44,15 @@ public class Entry extends Application {
     Boolean isLegible = true;
     String requestReason = null;
     String rejectionReason;
+    DatabaseQuery db;
+
+    {
+        try {
+            db = DatabaseQuery.getInstance(); // Create an instance of DatabaseQuery
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to initialize DatabaseQuery instance", e);
+        }
+    }
 
     /**
      * Constructor to initialize the Entry object with the username and role of the user.
@@ -55,7 +64,7 @@ public class Entry extends Application {
      * @param requestStatus The status of the request
      * @param submissionDate The date of submission
      */
-    public Entry(String requestID, String requestorName, String requestorCitizenship, String deceasedName, String requestStatus, String submissionDate, String rejectionReason) {
+    public Entry(int requestID, String requestorName, Boolean requestorCitizenship, String deceasedName, String requestStatus, String submissionDate, String rejectionReason) {
         this.requestID = requestID;
         this.requestorName = requestorName;
         this.requestorCitizenship = requestorCitizenship;
@@ -85,42 +94,28 @@ public class Entry extends Application {
         //grid.setGridLinesVisible(true);
         grid.setPrefSize(800, 600);
 
-        //Connect to the database and obtain necessary information
-        DatabaseQuery db = new DatabaseQuery();
         try {
-            db.connect();
-        } catch (Exception e) {
-            System.out.println("Error connecting to the database: " + e.getMessage());
-        }
-
-        try {
-            String getRequestor = "SELECT * FROM requestors WHERE requestorName = '" + this.requestorName + "'";
+            String getRequestor = "SELECT * FROM requestData WHERE formID = '" + this.requestID + "'";
             ResultSet rs = db.executeQuery(getRequestor);
             if (rs.next()) {
-                this.requestorID = rs.getString("requestorID");
-                this.requestorAddress = rs.getString("requestorAddress");
-                this.requestorCity = rs.getString("requestorCity");
-                this.requestorState = rs.getString("requestorState");
-                this.requestorZip = rs.getString("requestorZip");
-                this.requestorCitizenship = rs.getString("requestorCitizenship");
+                this.requestorName = rs.getString("requestorName");
+                String[] requestorAddress = rs.getString("requestorAddress").split(",");
+                this.requestorStreet = requestorAddress[0].trim();
+                this.requestorCity = requestorAddress[1].trim();
+                this.requestorState = requestorAddress[2].trim();
+                this.requestorZip = requestorAddress[3].trim();
                 this.requestorSSN = rs.getString("requestorSSN");
                 this.requestorPhone = rs.getString("requestorCell");
                 this.requestorEmail = rs.getString("requestorEmail");
-            }
-            String getDeceased = "SELECT * FROM deceased WHERE deceasedName = '" + this.deceasedName + "'";
-            ResultSet rs2 = db.executeQuery(getDeceased);
-            if (rs2.next()) {
-                this.deceasedID = rs2.getString("deceasedID");
-                this.deceasedDOB = rs2.getString("deceasedDOB");
-                this.deceasedSSN = rs2.getString("deceasedSSN");
-            }
-            String getRequest = "SELECT * FROM dataqueue WHERE requestID = '" + this.requestID + "'";
-            ResultSet rs3 = db.executeQuery(getRequest);
-            if (rs3.next()) {
-                this.relationship = rs3.getString("relationship");
-                this.requestStatus = rs3.getString("requestStatus");
-                this.requestReason = rs3.getString("reason");
-                this.isLegible = rs3.getBoolean("isLegible");
+                this.requestorCitizenship = rs.getBoolean("isCitizen");
+                this.isLegible = rs.getBoolean("isLegible");
+                this.relationship = rs.getString("deceasedRelationship");
+                this.requestReason = rs.getString("requestReason");
+                this.requestStatus = rs.getString("requestStatus");
+                this.submissionDate = rs.getString("requestDate");
+                this.deceasedName = rs.getString("deceasedName");
+                this.deceasedDOB = rs.getString("deceasedDOB");
+                this.deceasedSSN = rs.getString("deceasedSSN");
             }
         } catch (Exception e) {
             System.out.println("Error retrieving data from the database: " + e.getMessage());
@@ -171,7 +166,7 @@ public class Entry extends Application {
         grid.add(addressLabel, 0, 2);
         TextField addressFieldOne = new TextField();
         addressFieldOne.setPromptText("Address Line 1");
-        addressFieldOne.setText(this.requestorAddress);
+        addressFieldOne.setText(this.requestorStreet);
         grid.add(addressFieldOne, 1, 2, 2, 1);
         TextField addressFieldTwo = new TextField();
         addressFieldTwo.setPromptText("Address Line 2");
@@ -280,19 +275,21 @@ public class Entry extends Application {
         notesLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 15));
         notesLabel.setAlignment(Pos.CENTER_LEFT);
         Label citizenshipLabel = new Label("");
-        if (!this.requestorCitizenship.equals("citizen")) {
+        if (!this.requestorCitizenship) {
             citizenshipLabel.setText(this.requestorName + " is not a US Citizen.");
+            citizenshipLabel.setTextFill(Color.RED);
         }
         Label legibleLabel = new Label("");
-        if (this.isLegible == false) {
+        if (!this.isLegible) {
             legibleLabel.setText(this.requestorName + "'s request is not legible.");
+            legibleLabel.setTextFill(Color.RED);
         }
         notes.getChildren().addAll(notesLabel, citizenshipLabel, legibleLabel);
         grid.add(legibleLabel, 3, 4, 3, 3);
         grid.add(notes, 3, 4, 3, 3);
 
         //reject button action
-        rejectButton.setOnAction(e -> {
+        rejectButton.setOnAction(_ -> {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Reject Confirmation");
             alert.setHeaderText(null);
@@ -300,7 +297,7 @@ public class Entry extends Application {
             ComboBox<String> rejectionReasonComboBox = new ComboBox<>();
             rejectionReasonComboBox.getItems().addAll("Request is Illegible", "Requestor is NOT a U.S. Citizen", "Other");
             rejectionReasonComboBox.setPromptText("Select Rejection Reason");
-            if (!this.requestorCitizenship.equals("citizen")) {
+            if (!this.requestorCitizenship) {
                 rejectionReasonComboBox.setValue("Requestor is NOT a U.S. Citizen");
             }
             if (this.isLegible == false) {
@@ -310,7 +307,7 @@ public class Entry extends Application {
             rejectionReasonField.setPrefSize(250, 170);
             rejectionReasonField.setAlignment(Pos.TOP_LEFT);
             rejectionReasonField.setVisible(false); 
-            rejectionReasonComboBox.setOnAction(event -> {
+            rejectionReasonComboBox.setOnAction(_ -> {
                 String selectedReason = rejectionReasonComboBox.getValue();
                 if (selectedReason == "Other") {
                     rejectionReasonField.setVisible(true);
@@ -342,7 +339,7 @@ public class Entry extends Application {
                         } else {
                             rejectionReason = rejectionReasonField.getText();
                             try {
-                                String updateRequests = "UPDATE dataqueue SET requestStatus = 'Rejected', rejectionReason = '" + rejectionReason + "' WHERE requestID = '" + this.requestID + "'";
+                                String updateRequests = "UPDATE requestData SET requestStatus = 'Rejected', rejectionReason = '" + rejectionReason + "' WHERE formID = '" + this.requestID + "'";
                                 db.executeUpdate(updateRequests);
                             } catch (Exception ex) {
                                 System.out.println("Error updating the database: " + ex.getMessage());
@@ -353,7 +350,7 @@ public class Entry extends Application {
                     } else {
                         rejectionReason = rejectionReasonComboBox.getValue();
                         try {
-                            String updateRequests = "UPDATE dataqueue SET requestStatus = 'Rejected', rejectionReason = '" + this.rejectionReason + "' WHERE requestID = '" + this.requestID + "'";
+                            String updateRequests = "UPDATE requestData SET requestStatus = 'Rejected', rejectionReason = '" + this.rejectionReason + "' WHERE formID = '" + this.requestID + "'";
                             db.executeUpdate(updateRequests);
                         } catch (Exception ex) {
                             System.out.println("Error updating the database: " + ex.getMessage());
@@ -372,12 +369,13 @@ public class Entry extends Application {
         });
 
         //save button action
-        saveButton.setOnAction(e -> {
+        saveButton.setOnAction(_ -> {
             requestorName = nameTextField.getText();
-            requestorAddress = addressFieldOne.getText() + " " + addressFieldTwo.getText();
+            requestorStreet = addressFieldOne.getText() + " " + addressFieldTwo.getText();
             requestorCity = cityField.getText();
             requestorState = stateField.getText();
             requestorZip = zipField.getText();
+            String requestorAddress = requestorStreet + ", " + requestorCity + ", " + requestorState + ", " + requestorZip;
             requestorSSN = ssnField.getText();
             requestorPhone = phoneField.getText();
             requestorEmail = emailField.getText();
@@ -389,14 +387,8 @@ public class Entry extends Application {
 
             try {
                 // Update the database with the new values
-                String updateRequestor = "UPDATE requestors SET requestorName = '" + requestorName + "', requestorAddress = '" + requestorAddress + "', requestorCity = '" + requestorCity + "', requestorState = '" + requestorState + "', requestorZip = '" + requestorZip + "', requestorSSN = '" + requestorSSN + "', requestorCell = '" + requestorPhone + "', requestorEmail = '" + requestorEmail + "' WHERE requestorID = '" + this.requestorID + "'";
-                db.executeUpdate(updateRequestor);
-
-                String updateDeceased = "UPDATE deceased SET deceasedName = '" + deceasedName + "', deceasedDOB = '" + this.deceasedDOB + "', deceasedSSN = '" + this.deceasedSSN + "' WHERE deceasedID = '" + this.deceasedID + "'";
-                db.executeUpdate(updateDeceased);
-
-                String updateRequests = "UPDATE dataqueue SET relationship = '" + relationshipField.getText() + "', requestorName = '" + requestorName + "', deceasedName = '" + this.deceasedName + "', reason = '" + requestReason + "' WHERE requestID = '" + this.requestID +"'";
-                db.executeUpdate(updateRequests);
+                String updateRequest = "UPDATE requestData SET requestorName = '" + requestorName + "', requestorAddress = '" + requestorAddress + "', requestorSSN = '" + requestorSSN + "', requestorCell = '" + requestorPhone + "', requestorEmail = '" + requestorEmail + "', deceasedName = '" + deceasedName + "', deceasedDOB = '" + this.deceasedDOB + "', deceasedSSN = '" + this.deceasedSSN + "', deceasedRelationship = '" + relationship + "', requestReason = '" + requestReason + "' WHERE formID = '" + this.requestID + "'";
+                db.executeUpdate(updateRequest);
                 
             } catch (Exception ex) {
                 System.out.println("Error updating the database: " + ex.getMessage());
@@ -405,7 +397,7 @@ public class Entry extends Application {
         });
 
         //submit button action
-        submitButton.setOnAction(e -> {
+        submitButton.setOnAction(_ -> {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Submission Confirmation");
             alert.setHeaderText(null);
@@ -414,10 +406,11 @@ public class Entry extends Application {
                 if (response == ButtonType.OK) {
                     // User clicked OK, proceed with submission
                     requestorName = nameTextField.getText();
-                    requestorAddress = addressFieldOne.getText() + " " + addressFieldTwo.getText();
+                    requestorStreet = addressFieldOne.getText() + " " + addressFieldTwo.getText();
                     requestorCity = cityField.getText();
                     requestorState = stateField.getText();
                     requestorZip = zipField.getText();
+                    String requestorAddress = requestorStreet + ", " + requestorCity + ", " + requestorState + ", " + requestorZip;
                     requestorSSN = ssnField.getText();
                     requestorPhone = phoneField.getText();
                     requestorEmail = emailField.getText();
@@ -430,19 +423,15 @@ public class Entry extends Application {
                     
                     try {
                         // Update the database with the new values
-                        String updateRequestor = "UPDATE requestors SET requestorName = '" + requestorName + "', requestorAddress = '" + requestorAddress + "', requestorCity = '" + requestorCity + "', requestorState = '" + requestorState + "', requestorZip = '" + requestorZip + "', requestorSSN = '" + requestorSSN + "', requestorCell = '" + requestorPhone + "', requestorEmail = '" + requestorEmail + "' WHERE requestorID = '" + this.requestorID + "'";
+                        String updateRequestor = "UPDATE requestData SET requestorName = '" + requestorName + "', requestorAddress = '" + requestorAddress + "', requestorSSN = '" + requestorSSN + "', requestorCell = '" + requestorPhone + "', requestorEmail = '" + requestorEmail + "', deceasedName = '" + deceasedName + "', deceasedDOB = '" + this.deceasedDOB + "', deceasedSSN = '" + this.deceasedSSN + "', deceasedRelationship = '" + relationship + "', requestReason = '" + requestReason + "', requestStatus = '" + this.requestStatus + "' WHERE formID = '" + this.requestID + "'";
                         db.executeUpdate(updateRequestor);
-
-                        String updateDeceased = "UPDATE deceased SET deceasedName = '" + deceasedName + "', deceasedDOB = '" + this.deceasedDOB + "', deceasedSSN = '" + this.deceasedSSN + "' WHERE deceasedID = '" + this.deceasedID + "'";
-                        db.executeUpdate(updateDeceased);
-
-                        String updateRequests = "UPDATE dataqueue SET relationship = '" + relationshipField.getText() + "', requestorName = '" + requestorName + "', deceasedName = '" + this.deceasedName + "', reason = '" + requestReason + "', requestStatus = '" + this.requestStatus + "' WHERE requestID = '" + this.requestID + "'";
-                        db.executeUpdate(updateRequests);
 
                     } catch (Exception ex) {
                         System.out.println("Error updating the database: " + ex.getMessage());
                     }
-                    actionTarget.setText("Submitted successfully!");
+                    
+                    db.getWorkflow().AddWFItem(requestID, "Review");
+                    actionTarget.setText("Sent to Review");
                     primaryStage.close();
                 } else {
                     // User clicked Cancel or closed the dialog, do nothing
@@ -455,13 +444,6 @@ public class Entry extends Application {
         Scene scene = new Scene(grid, 800, 570);
         primaryStage.setScene(scene);
         primaryStage.show();
-        primaryStage.setOnHiding(event -> {
-            try {
-                db.close(); // Ensure the database connection is closed
-            } catch (Exception e) {
-                System.out.println("Error closing the database connection: " + e.getMessage());
-            }
-        });
     }
     
     /**
@@ -469,7 +451,7 @@ public class Entry extends Application {
      * 
      * @return the request ID
      */
-    public String getRequestID() {
+    public int getRequestID() {
         return requestID;
     }
 
@@ -488,7 +470,11 @@ public class Entry extends Application {
      * @return the requestor citizenship
      */
     public String getRequestorCitizenship() {
-        return requestorCitizenship;
+        if (requestorCitizenship) {
+            return "Citizen";
+        } else {
+            return "Non-Citizen";
+        }
     }
 
     /**

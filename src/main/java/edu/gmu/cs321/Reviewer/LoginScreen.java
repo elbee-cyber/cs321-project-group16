@@ -37,9 +37,9 @@ public class LoginScreen extends Application {
         Alert failAlert = new Alert(Alert.AlertType.ERROR);
 
         // db connection
-        DatabaseQuery db = new DatabaseQuery();
+        DatabaseQuery db;
         try{
-            db.connect();
+            db = DatabaseQuery.getInstance();
         }catch(java.sql.SQLException e){
             e.printStackTrace();
             failAlert.setTitle("Database Connection Failed");

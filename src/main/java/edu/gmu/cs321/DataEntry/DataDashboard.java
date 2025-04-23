@@ -29,18 +29,24 @@ public class DataDashboard extends Application {
     String username;
     String role;
     DatabaseQuery db;
+    // Create an instance of DatabaseQuery
+    {
+        try {
+            db = DatabaseQuery.getInstance(); // Create an instance of DatabaseQuery
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to initialize DatabaseQuery instance", e);
+        }
+    }
 
     /**
      * Constructor to initialize the DataDashboard object with the username and
      * role of the user.
      * @param username The username of the user
      * @param role The role of the user (e.g., admin, user)
-     * @param db The database query object to interact with the database
      */
     public DataDashboard(String username, String role) {
         this.username = username;
         this.role = role;
-        this.db = new DatabaseQuery();
     }
 
     private void updatePreviewBox(VBox previewBox, Entry entryForm) {
@@ -71,21 +77,20 @@ public class DataDashboard extends Application {
     private void refreshQueue(ListView<Entry> queue, ObservableList<Entry> entries, String selectedFilter, String selectedSort) {
         entries.clear(); // Clear the current entries
         try {
-            db.connect();
             String query;
             if (selectedFilter.equals("All")) {
-                query = "SELECT * FROM dataqueue ORDER BY " + (selectedSort.equals("Sort by Request ID") ? "requestID" : "submissionDate");
+                query = "SELECT * FROM requestData ORDER BY " + (selectedSort.equals("Sort by Request ID") ? "formID" : "requestDate");
             } else {
-                query = "SELECT * FROM dataqueue WHERE requestStatus = '" + selectedFilter + "' ORDER BY " + (selectedSort.equals("Sort by Request ID") ? "requestID" : "submissionDate");
+                query = "SELECT * FROM requestData WHERE requestStatus = '" + selectedFilter + "' ORDER BY " + (selectedSort.equals("Sort by Request ID") ? "formID" : "requestDate");
             }
             ResultSet rs = db.executeQuery(query);
             while (rs.next()) {
-                String requestID = rs.getString("requestID");
+                int requestID = rs.getInt("formID");
                 String requestorName = rs.getString("requestorName");
-                String requestorCitizenship = rs.getString("requestorCitizenship");
+                Boolean requestorCitizenship = rs.getBoolean("isCitizen");
                 String deceasedName = rs.getString("deceasedName");
                 String requestStatus = rs.getString("requestStatus");
-                String submissionDate = rs.getString("submissionDate");
+                String submissionDate = rs.getString("requestDate");
                 String rejectionReason = rs.getString("rejectionReason"); // Get the rejection reason from the database
 
                 Entry entry = new Entry(requestID, requestorName, requestorCitizenship, deceasedName, requestStatus, submissionDate, rejectionReason);
@@ -137,8 +142,8 @@ public class DataDashboard extends Application {
         grid.add(header, 0, 0, 3, 1);
 
         ComboBox<String> filterComboBox = new ComboBox<>();
-        filterComboBox.getItems().addAll("All", "Pending Data Entry", "Pending Review", "Rejected");
-        filterComboBox.setValue("All"); // Set default value
+        filterComboBox.getItems().addAll("All", "Pending Data Entry", "Pending Review", "Pending Approval", "Rejected");
+        filterComboBox.setValue("Pending Data Entry"); // Set default value
         filterComboBox.setPromptText("Filter by Status");
         String filter = filterComboBox.getValue(); // Get the selected filter value
 
@@ -178,7 +183,7 @@ public class DataDashboard extends Application {
                 try {
                     Stage entryStage = new Stage();
                     entryForm.start(entryStage);
-                    entryStage.setOnHiding(event -> {
+                    entryStage.setOnHiding(_ -> {
                         refreshQueue(queue, entries, filter, sort); // Refresh the ListView when the entry form is closed
                         updatePreviewBox(previewBox, entryForm);
                     });
@@ -188,20 +193,20 @@ public class DataDashboard extends Application {
             }
         });
 
-        filterComboBox.setOnAction(e -> {
+        filterComboBox.setOnAction(_ -> {
             String selectedFilter = filterComboBox.getValue();
             String selectedSort = sortComboBox.getValue(); // Get the selected sort value
             refreshQueue(queue, entries, selectedFilter, selectedSort); // Refresh the ListView with filtered entries
         });
 
-        sortComboBox.setOnAction(e -> {
+        sortComboBox.setOnAction(_ -> {
             String selectedSort = sortComboBox.getValue();
             String selectedFilter = filterComboBox.getValue(); // Get the selected filter value
             refreshQueue(queue, entries, selectedFilter, selectedSort); // Refresh the ListView with sorted entries
         });
 
         Button logout = new Button("Logout");
-        logout.setOnAction(e -> {
+        logout.setOnAction(_ -> {
             primaryStage.close(); // Close the dashboard
             LoginScreen loginScreen = new LoginScreen(); // Create a new login screen instance
             try {

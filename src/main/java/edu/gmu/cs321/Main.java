@@ -11,6 +11,14 @@ import javafx.stage.Stage;
 
 // This is the main class for the application. It serves as the entry point for the JavaFX application.
 public class Main extends Application {
+    DatabaseQuery db;
+    {
+        try {
+            db = DatabaseQuery.getInstance(); // Create an instance of DatabaseQuery
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to initialize DatabaseQuery instance", e);
+        }
+    }
     /**
      * The start method is called when the JavaFX application is launched.
      * It sets up the primary stage and displays the role selection screen.
@@ -19,6 +27,11 @@ public class Main extends Application {
      */
     @Override
     public void start(Stage primaryStage) {
+        try {
+            db.connect(); // Connect to the database
+        } catch (Exception e) {
+            e.printStackTrace(); // Print any connection errors
+        }
         primaryStage.setTitle("Genealogy Records Request System");
 
         // Create a label for the heading and instructions
@@ -35,9 +48,9 @@ public class Main extends Application {
         Button reviewerButton = new Button("Reviewer");
 
         // Set button actions
-        approverButton.setOnAction(e -> edu.gmu.cs321.Approver.LoginScreen.main(new String[]{}));
-        dataEntryButton.setOnAction(e -> edu.gmu.cs321.DataEntry.LoginScreen.main(new String[]{}));
-        reviewerButton.setOnAction(e -> edu.gmu.cs321.Reviewer.LoginScreen.main(new String[]{}));
+        approverButton.setOnAction(_ -> edu.gmu.cs321.Approver.LoginScreen.main(new String[]{}));
+        dataEntryButton.setOnAction(_ -> edu.gmu.cs321.DataEntry.LoginScreen.main(new String[]{}));
+        reviewerButton.setOnAction(_ -> edu.gmu.cs321.Reviewer.LoginScreen.main(new String[]{}));
 
         // Add heading and buttons to a layout
         VBox layout = new VBox(10);
@@ -53,6 +66,13 @@ public class Main extends Application {
         Scene scene = new Scene(layout, 400, 200);
         primaryStage.setScene(scene);
         primaryStage.show();
+        primaryStage.setOnHidden(_ -> {
+            try {
+                db.closeConnection(); // Close the database connection when the application is closed
+            } catch (Exception e) {
+                e.printStackTrace(); // Print any closing errors
+            }
+        });
     }
 
     /**
