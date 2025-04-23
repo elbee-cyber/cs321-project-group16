@@ -77,7 +77,14 @@ public class LoginScreen extends Application {
      * @throws SQLException if a database access error occurs during the query
      */
     private boolean validateLogin(String username, String password, Stage primaryStage, Label actiontarget) {
-        DatabaseQuery dbQuery = new DatabaseQuery();
+        DatabaseQuery dbQuery;
+        
+        try {
+            dbQuery = DatabaseQuery.getInstance();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;  // Database connection error
+        }
 
         try {
             // Connect to the database

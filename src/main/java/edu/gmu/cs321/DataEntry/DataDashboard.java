@@ -10,6 +10,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.ColumnConstraints;
@@ -28,24 +29,30 @@ public class DataDashboard extends Application {
     String username;
     String role;
     DatabaseQuery db;
+    // Create an instance of DatabaseQuery
+    {
+        try {
+            db = DatabaseQuery.getInstance(); // Create an instance of DatabaseQuery
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to initialize DatabaseQuery instance", e);
+        }
+    }
 
     /**
      * Constructor to initialize the DataDashboard object with the username and
      * role of the user.
      * @param username The username of the user
      * @param role The role of the user (e.g., admin, user)
-     * @param db The database query object to interact with the database
      */
     public DataDashboard(String username, String role) {
         this.username = username;
         this.role = role;
-        this.db = new DatabaseQuery();
     }
 
     private void updatePreviewBox(VBox previewBox, Entry entryForm) {
         // Clear previous labels if any
         previewBox.getChildren().clear();
-        Label requestIDLabel = new Label("Request ID: " + entryForm.getRequestID());
+        Label requestIDLabel = new Label("Request ID: " + entryForm.getRequestID() + " ("+ entryForm.getRequestStatus() + ")");
         requestIDLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #333;");
         Label requestorNameLabel = new Label("- Requestor Name: " + entryForm.getRequestorName());
         requestorNameLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: #333;");
@@ -55,8 +62,44 @@ public class DataDashboard extends Application {
         deceasedNameLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: #333;");
         Label submissionDateLabel = new Label("- Submission Date: " + entryForm.getSubmissionDate());
         submissionDateLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: #333;");
+        Label rejectedLabel = new Label("REQUEST HAS BEEN REJECTED");
+        rejectedLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: #FF0000; -fx-font-weight: bold;");
+        Label rejectionReasonLabel = new Label("- Rejection Reason: " + entryForm.getRejectionReason());
+        rejectionReasonLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: #333;");
+        if (entryForm.getRequestStatus().equals("Rejected")) {
+            previewBox.getChildren().addAll(rejectedLabel, rejectionReasonLabel);
+        } else {
+            previewBox.getChildren().addAll(requestIDLabel, requestorNameLabel, requestorCitizenshipLabel, deceasedNameLabel, submissionDateLabel);
+        }
+    }
 
-        previewBox.getChildren().addAll(requestIDLabel, requestorNameLabel, requestorCitizenshipLabel, deceasedNameLabel, submissionDateLabel);
+    // Method to refresh the ListView with updated data from the database
+    private void refreshQueue(ListView<Entry> queue, ObservableList<Entry> entries, String selectedFilter, String selectedSort) {
+        entries.clear(); // Clear the current entries
+        try {
+            String query;
+            if (selectedFilter.equals("All")) {
+                query = "SELECT * FROM requestData ORDER BY " + (selectedSort.equals("Sort by Request ID") ? "formID" : "requestDate");
+            } else {
+                query = "SELECT * FROM requestData WHERE requestStatus = '" + selectedFilter + "' ORDER BY " + (selectedSort.equals("Sort by Request ID") ? "formID" : "requestDate");
+            }
+            ResultSet rs = db.executeQuery(query);
+            while (rs.next()) {
+                int requestID = rs.getInt("formID");
+                String requestorName = rs.getString("requestorName");
+                Boolean requestorCitizenship = rs.getBoolean("isCitizen");
+                String deceasedName = rs.getString("deceasedName");
+                String requestStatus = rs.getString("requestStatus");
+                String submissionDate = rs.getString("requestDate");
+                String rejectionReason = rs.getString("rejectionReason"); // Get the rejection reason from the database
+
+                Entry entry = new Entry(requestID, requestorName, requestorCitizenship, deceasedName, requestStatus, submissionDate, rejectionReason);
+                entries.add(entry);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        queue.setItems(entries); // Update the ListView with new entries
     }
 
     /**
@@ -98,30 +141,24 @@ public class DataDashboard extends Application {
         header.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #333;");
         grid.add(header, 0, 0, 3, 1);
 
+        ComboBox<String> filterComboBox = new ComboBox<>();
+        filterComboBox.getItems().addAll("All", "Pending Data Entry", "Pending Review", "Pending Approval", "Rejected");
+        filterComboBox.setValue("Pending Data Entry"); // Set default value
+        filterComboBox.setPromptText("Filter by Status");
+        String filter = filterComboBox.getValue(); // Get the selected filter value
+
+        ComboBox<String> sortComboBox = new ComboBox<>();
+        sortComboBox.getItems().addAll("Sort by Request ID", "Sort by Submission Date");
+        sortComboBox.setValue("Sort by Request ID"); // Set default value
+        sortComboBox.setPromptText("Sort by");
+        String sort = sortComboBox.getValue(); // Get the selected sort value
+
         ListView<Entry> queue = new ListView<>();
         ObservableList<Entry> entries = FXCollections.observableArrayList();
 
         // Populate the ListView with data from the database
-        try {
-            db.connect();
-            String query = "SELECT * FROM dataqueue";
-            ResultSet rs = db.executeQuery(query);
-            while (rs.next()) {
-                String requestID = rs.getString("requestID");
-                String requestorName = rs.getString("requestorName");
-                String requestorCitizenship = rs.getString("requestorCitizenship");
-                String deceasedName = rs.getString("deceasedName");
-                String requestStatus = rs.getString("requestStatus");
-                String submissionDate = rs.getString("submissionDate");
+        refreshQueue(queue, entries, filter, sort);
 
-                Entry entry = new Entry(requestID, requestorName, requestorCitizenship, deceasedName, requestStatus, submissionDate);
-                entries.add(entry);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        queue.setItems(entries);
         grid.add(queue, 0, 1, 2, 1);
 
         // Vbox to hold the preview of the selected entry
@@ -144,15 +181,32 @@ public class DataDashboard extends Application {
             if (e.getClickCount() == 2) {
                 // Open the entry form in a new window
                 try {
-                    entryForm.start(new Stage());
+                    Stage entryStage = new Stage();
+                    entryForm.start(entryStage);
+                    entryStage.setOnHiding(_ -> {
+                        refreshQueue(queue, entries, filter, sort); // Refresh the ListView when the entry form is closed
+                        updatePreviewBox(previewBox, entryForm);
+                    });
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
             }
         });
 
+        filterComboBox.setOnAction(_ -> {
+            String selectedFilter = filterComboBox.getValue();
+            String selectedSort = sortComboBox.getValue(); // Get the selected sort value
+            refreshQueue(queue, entries, selectedFilter, selectedSort); // Refresh the ListView with filtered entries
+        });
+
+        sortComboBox.setOnAction(_ -> {
+            String selectedSort = sortComboBox.getValue();
+            String selectedFilter = filterComboBox.getValue(); // Get the selected filter value
+            refreshQueue(queue, entries, selectedFilter, selectedSort); // Refresh the ListView with sorted entries
+        });
+
         Button logout = new Button("Logout");
-        logout.setOnAction(e -> {
+        logout.setOnAction(_ -> {
             primaryStage.close(); // Close the dashboard
             LoginScreen loginScreen = new LoginScreen(); // Create a new login screen instance
             try {
@@ -161,10 +215,10 @@ public class DataDashboard extends Application {
                 ex.printStackTrace();
             }
         });
-        HBox logoutButtonBox = new HBox(10);
-        logoutButtonBox.setAlignment(Pos.CENTER);
-        logoutButtonBox.getChildren().add(logout);
-        grid.add(logoutButtonBox, 3, 0);
+        HBox buttonBox = new HBox(10);
+        buttonBox.setAlignment(Pos.CENTER_RIGHT);
+        buttonBox.getChildren().addAll(filterComboBox, sortComboBox, logout);
+        grid.add(buttonBox, 1, 0, 3, 1);
 
         Scene scene = new Scene(grid, 800, 600);
         primaryStage.setScene(scene);

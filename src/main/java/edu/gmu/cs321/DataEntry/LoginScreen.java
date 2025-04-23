@@ -13,9 +13,7 @@ import edu.gmu.cs321.DatabaseQuery;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-//import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
@@ -32,6 +30,15 @@ import javafx.event.ActionEvent;
 public class LoginScreen extends Application {
     
     String selectedRole = "";
+    DatabaseQuery db;
+    // Create an instance of DatabaseQuery
+    {
+        try {
+            db = DatabaseQuery.getInstance(); // Create an instance of DatabaseQuery
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to initialize DatabaseQuery instance", e);
+        }
+    }
 
     /**
      * Method to hash the password using PBKDF2 with HmacSHA1.
@@ -87,20 +94,6 @@ public class LoginScreen extends Application {
         grid.setVgap(10);
         grid.setPadding(new Insets(25, 25, 25, 25));
 
-        // Connect to database
-        DatabaseQuery db = new DatabaseQuery();
-        try {
-            db.connect();
-        } catch (java.sql.SQLException e) {
-            e.printStackTrace();
-            Alert failAlert = new Alert(Alert.AlertType.ERROR);
-            failAlert.setTitle("Database Connection Failed");
-            failAlert.setHeaderText("Database Connection Failed");
-            failAlert.setContentText("Please restart the application.");
-            failAlert.showAndWait();
-            return;
-        }
-
         // welcome header
         Text header = new Text("Welcome to Data Entry");
         header.setFont(Font.font("Verdana", FontWeight.NORMAL, 20));
@@ -131,7 +124,7 @@ public class LoginScreen extends Application {
         Hyperlink forgotPassword = new Hyperlink("I forgot my password.");
         forgotPassword.setTextFill(Color.BLUEVIOLET);
         forgotPassword.setFont(Font.font("Verdana", FontWeight.NORMAL, 12));
-        forgotPassword.setOnAction((ActionEvent e) -> {
+        forgotPassword.setOnAction((ActionEvent _) -> {
             // New window for password reminder
             Stage passwordStage = new Stage();
             passwordStage.setTitle("Password Reminder");
@@ -150,26 +143,8 @@ public class LoginScreen extends Application {
             passwordGrid.add(remindUser, 0, 0);
             TextField remindUserText = new TextField();
             passwordGrid.add(remindUserText, 1, 0);
-            /* 
-            Label remindRole = new Label("Role:");
-            remindRole.setFont(Font.font("Verdana", FontWeight.NORMAL, 15));
-            passwordGrid.add(remindRole, 0, 1);
-           
-            final ComboBox<String> roles = new ComboBox<>();
-            roles.getItems().addAll("Data Entry", "Review", "Approval");
-            roles.setPromptText("Select Role");
-            passwordGrid.add(roles, 1, 1);
 
-            roles.setOnAction(event -> {
-                // Role Selection Logic
-                if (remindUserText.getText().equals("admin") && roles.getValue().equals("Data Entry")) {
-                    reminderText.setText("Your password is: data");
-                } else {
-                    reminderText.setText("No password found for this user/role combination.");
-                }
-            });
-            */
-            remindUserText.setOnAction(event -> {
+            remindUserText.setOnAction(_ -> {
                 if (remindUserText.getText().equals("data")/* && roles.getValue().equals("Data Entry")*/) {
                     reminderText.setText("Your password is: admin");
                 } else {
@@ -177,7 +152,7 @@ public class LoginScreen extends Application {
                 }
             });
             Button okButton = new Button("OK");
-                okButton.setOnAction(event1 -> passwordStage.close());
+                okButton.setOnAction(_ -> passwordStage.close());
                 passwordGrid.add(okButton, 1, 3);
                 GridPane.setHalignment(okButton, HPos.RIGHT);
 
@@ -202,7 +177,7 @@ public class LoginScreen extends Application {
         actiontarget.setFont(Font.font("Verdana", FontWeight.NORMAL, 15));
 
         //functionality for login button
-        loginButton.setOnAction(e -> {
+        loginButton.setOnAction(_ -> {
             // Add your login logic here
             String username = userTextField.getText();
             String password = pwBox.getText();
@@ -224,17 +199,6 @@ public class LoginScreen extends Application {
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }
-
-/*
-            if (username.equals("data") && password.equals("guest")) {
-                actiontarget.setText("Login successful!");
-                // Proceed to the next screen or functionality
-                DataDashboard dashboard = new DataDashboard(username, selectedRole);
-                dashboard.start(primaryStage);
-            } else {
-                actiontarget.setText("Invalid credentials.");
-            }
-*/
         });
 
         //keyboard event for login button (ENTER key)
