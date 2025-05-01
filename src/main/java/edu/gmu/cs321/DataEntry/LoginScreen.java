@@ -1,4 +1,4 @@
-package edu.gmu.cs321.DataEntry;
+package edu.gmu.cs321.dataentry;
 
 import javafx.stage.Stage;
 

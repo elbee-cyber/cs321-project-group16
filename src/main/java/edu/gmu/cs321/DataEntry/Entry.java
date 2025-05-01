@@ -1,4 +1,4 @@
-package edu.gmu.cs321.DataEntry;
+package edu.gmu.cs321.dataentry;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -31,7 +31,7 @@ public class Entry extends Application {
     String requestorCity = null;
     String requestorState = null;
     String requestorZip = null;
-    Boolean requestorCitizenship;
+    Boolean requestorCitizenship = true;
     String requestorSSN = null;
     String requestorPhone = null;
     String requestorEmail = null;
@@ -46,12 +46,23 @@ public class Entry extends Application {
     String rejectionReason;
     DatabaseQuery db;
 
-    {
+    private void initialize() {
         try {
             db = DatabaseQuery.getInstance(); // Create an instance of DatabaseQuery
         } catch (SQLException e) {
             throw new RuntimeException("Failed to initialize DatabaseQuery instance", e);
         }
+    }
+
+    /**
+     * Method to get the current date in MM/DD/YYYY format.
+     * 
+     * @return the current date as a string
+     */
+    private String todayDate() {
+        java.util.Date date = new java.util.Date();
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MM/dd/yyyy");
+        return sdf.format(date);
     }
 
     /**
@@ -75,12 +86,27 @@ public class Entry extends Application {
     }
 
     /**
+     * Default constructor for the Entry class.
+     */
+    public Entry(int requestID) {
+        this.requestID = requestID;
+        this.requestorName = null;
+        this.requestorCitizenship = true;
+        this.deceasedName = null;
+        this.requestStatus = "Pending Data Entry";
+        this.submissionDate = todayDate();
+        this.rejectionReason = null;
+    }
+
+    /**
      * Method to start the JavaFX application and set up the main entry form UI.
      * 
      * @param primaryStage the primary stage for this application
      */
     @Override
     public void start(Stage primaryStage) {
+        initialize(); // Initialize the database connection
+
         primaryStage.setTitle("Data Entry");
         primaryStage.setResizable(false);
         primaryStage.centerOnScreen();
@@ -176,10 +202,12 @@ public class Entry extends Application {
         cityField.setPromptText("City");
         cityField.setText(this.requestorCity);
         grid.add(cityField, 1, 4, 2, 1);
+
         TextField stateField = new TextField();
         stateField.setPromptText("State");
         stateField.setText(this.requestorState);
         grid.add(stateField, 1, 5, 2, 1);
+
         TextField zipField = new TextField();
         zipField.setPromptText("Zip Code");
         zipField.setText(this.requestorZip);
@@ -297,10 +325,10 @@ public class Entry extends Application {
             ComboBox<String> rejectionReasonComboBox = new ComboBox<>();
             rejectionReasonComboBox.getItems().addAll("Request is Illegible", "Requestor is NOT a U.S. Citizen", "Other");
             rejectionReasonComboBox.setPromptText("Select Rejection Reason");
-            if (!this.requestorCitizenship) {
+            if (Boolean.FALSE.equals(requestorCitizenship)) {
                 rejectionReasonComboBox.setValue("Requestor is NOT a U.S. Citizen");
             }
-            if (this.isLegible == false) {
+            if (Boolean.FALSE.equals(this.isLegible)) {
                 rejectionReasonComboBox.setValue("Request is Illegible");
             }
             TextField rejectionReasonField = new TextField();
@@ -309,7 +337,7 @@ public class Entry extends Application {
             rejectionReasonField.setVisible(false); 
             rejectionReasonComboBox.setOnAction(_ -> {
                 String selectedReason = rejectionReasonComboBox.getValue();
-                if (selectedReason == "Other") {
+                if ("Other".equals(selectedReason)) {
                     rejectionReasonField.setVisible(true);
                     rejectionReasonField.setPromptText("Please specify the reason for rejection.");
                 } else {
@@ -386,9 +414,16 @@ public class Entry extends Application {
             requestReason = requestReasonField.getText();
 
             try {
-                // Update the database with the new values
-                String updateRequest = "UPDATE requestData SET requestorName = '" + requestorName + "', requestorAddress = '" + requestorAddress + "', requestorSSN = '" + requestorSSN + "', requestorCell = '" + requestorPhone + "', requestorEmail = '" + requestorEmail + "', deceasedName = '" + deceasedName + "', deceasedDOB = '" + this.deceasedDOB + "', deceasedSSN = '" + this.deceasedSSN + "', deceasedRelationship = '" + relationship + "', requestReason = '" + requestReason + "' WHERE formID = '" + this.requestID + "'";
-                db.executeUpdate(updateRequest);
+                // Create a new entry query if the request does not exist yet, otherwise update the database with the new values
+                String checkRequest = "SELECT * FROM requestData WHERE formID = '" + this.requestID + "'";
+                ResultSet rs = db.executeQuery(checkRequest);
+                if (!rs.next()) {
+                    String insertRequest = "INSERT IGNORE INTO requestData (requestorName, requestorAddress, requestorSSN, requestorCell, requestorEmail, deceasedName, deceasedDOB, deceasedSSN, deceasedRelationship, requestReason, requestStatus) VALUES ('" + requestorName + "', '" + requestorAddress + "', '" + requestorSSN + "', '" + requestorPhone + "', '" + requestorEmail + "', '" + deceasedName + "', '" + this.deceasedDOB + "', '" + this.deceasedSSN + "', '" + relationship + "', '" + requestReason + "', '" + this.requestStatus + "')";
+                    db.executeUpdate(insertRequest);
+                } else {
+                    String updateRequestor = "UPDATE requestData SET requestorName = '" + requestorName + "', requestorAddress = '" + requestorAddress + "', requestorSSN = '" + requestorSSN + "', requestorCell = '" + requestorPhone + "', requestorEmail = '" + requestorEmail + "', deceasedName = '" + deceasedName + "', deceasedDOB = '" + this.deceasedDOB + "', deceasedSSN = '" + this.deceasedSSN + "', deceasedRelationship = '" + relationship + "', requestReason = '" + requestReason + "', requestStatus = '" + this.requestStatus + "' WHERE formID = '" + this.requestID + "'";
+                    db.executeUpdate(updateRequestor);
+                }
                 
             } catch (Exception ex) {
                 System.out.println("Error updating the database: " + ex.getMessage());
@@ -422,10 +457,17 @@ public class Entry extends Application {
                     this.requestStatus = "Pending Review";
                     
                     try {
-                        // Update the database with the new values
-                        String updateRequestor = "UPDATE requestData SET requestorName = '" + requestorName + "', requestorAddress = '" + requestorAddress + "', requestorSSN = '" + requestorSSN + "', requestorCell = '" + requestorPhone + "', requestorEmail = '" + requestorEmail + "', deceasedName = '" + deceasedName + "', deceasedDOB = '" + this.deceasedDOB + "', deceasedSSN = '" + this.deceasedSSN + "', deceasedRelationship = '" + relationship + "', requestReason = '" + requestReason + "', requestStatus = '" + this.requestStatus + "' WHERE formID = '" + this.requestID + "'";
-                        db.executeUpdate(updateRequestor);
-
+                        // Create a new entry query if the request does not exist yet, otherwise update the database with the new values
+                        String checkRequest = "SELECT * FROM requestData WHERE formID = '" + this.requestID + "'";
+                        ResultSet rs = db.executeQuery(checkRequest);
+                        if (!rs.next()) {
+                            String insertRequest = "INSERT IGNORE INTO requestData (requestorName, requestorAddress, requestorSSN, requestorCell, requestorEmail, deceasedName, deceasedDOB, deceasedSSN, deceasedRelationship, requestReason, requestStatus) VALUES ('" + requestorName + "', '" + requestorAddress + "', '" + requestorSSN + "', '" + requestorPhone + "', '" + requestorEmail + "', '" + deceasedName + "', '" + this.deceasedDOB + "', '" + this.deceasedSSN + "', '" + relationship + "', '" + requestReason + "', '" + this.requestStatus + "')";
+                            db.executeUpdate(insertRequest);
+                            
+                        } else {
+                            String updateRequestor = "UPDATE requestData SET requestorName = '" + requestorName + "', requestorAddress = '" + requestorAddress + "', requestorSSN = '" + requestorSSN + "', requestorCell = '" + requestorPhone + "', requestorEmail = '" + requestorEmail + "', deceasedName = '" + deceasedName + "', deceasedDOB = '" + this.deceasedDOB + "', deceasedSSN = '" + this.deceasedSSN + "', deceasedRelationship = '" + relationship + "', requestReason = '" + requestReason + "', requestStatus = '" + this.requestStatus + "' WHERE formID = '" + this.requestID + "'";
+                            db.executeUpdate(updateRequestor);
+                        }
                     } catch (Exception ex) {
                         System.out.println("Error updating the database: " + ex.getMessage());
                     }
