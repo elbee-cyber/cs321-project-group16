@@ -104,6 +104,15 @@ public class DataDashboard extends Application {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        //Obtain total number of entries in the database
+        try {
+            ResultSet rs = db.executeQuery("SELECT COUNT(*) AS total FROM requestData");
+            if (rs.next()) {
+                numEntries = rs.getInt("total");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         queue.setItems(entries); // Update the ListView with new entries
     }
 
@@ -118,16 +127,6 @@ public class DataDashboard extends Application {
         primaryStage.setTitle("Data Entry Dashboard");
         primaryStage.setResizable(false);
         primaryStage.centerOnScreen();
-
-        //Obtain total number of entries in the database
-        try {
-            ResultSet rs = db.executeQuery("SELECT COUNT(*) AS total FROM requestData");
-            if (rs.next()) {
-                numEntries = rs.getInt("total");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
 
         GridPane grid = setupGridPane();
         Label header = createHeader();
