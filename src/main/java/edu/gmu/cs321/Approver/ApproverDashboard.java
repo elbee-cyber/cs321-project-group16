@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import edu.gmu.cs321.DatabaseQuery;
+import com.cs321.Workflow;
 import edu.gmu.cs321.ImmigrationRequest;
 
 
