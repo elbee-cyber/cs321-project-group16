@@ -6,6 +6,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import edu.gmu.cs321.Approver.ApproverDashboard;
 import edu.gmu.cs321.DatabaseQuery;
@@ -28,13 +29,18 @@ public class LoginScreen extends Application {
      */
     @Override
     public void start(Stage primaryStage) {
+
+        Label pageTitle = new Label("Approver Login");
+        pageTitle.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-padding: 10px;");
+
         // Create the UI elements for login
+        Label usernameLabel = new Label("Username:");
         TextField usernameField = new TextField();
-        usernameField.setPromptText("Username");
+        
 
+        Label passwordLabel = new Label("Password:");
         PasswordField passwordField = new PasswordField();
-        passwordField.setPromptText("Password");
-
+        
         Button loginButton = new Button("Login");
         Hyperlink forgotPasswordLink = new Hyperlink("Forgot Password?");
 
@@ -53,8 +59,15 @@ public class LoginScreen extends Application {
             }
         });
 
+        // Layout for the username and password fields
+        HBox usernameBox = new HBox(10, usernameLabel, usernameField);
+        usernameBox.setAlignment(Pos.CENTER);
+        
+        HBox passwordBox = new HBox(10, passwordLabel, passwordField);
+        passwordBox.setAlignment(Pos.CENTER);
+
         // Layout and Scene
-        VBox vbox = new VBox(10, usernameField, passwordField, loginButton, forgotPasswordLink, actiontarget);
+        VBox vbox = new VBox(15, pageTitle, usernameBox, passwordBox, loginButton, forgotPasswordLink, actiontarget);
         vbox.setAlignment(Pos.CENTER);
         vbox.setMinSize(300, 200);
 
