@@ -84,7 +84,7 @@ public class DatabaseQuery {
                 "INSERT IGNORE INTO salts (userid, salt) VALUES (1, 'bffc343e7e8d8f9bdbdceca9f1d3d439');", //salt for login authentication
 
                 "CREATE TABLE IF NOT EXISTS users (userid INT PRIMARY KEY AUTO_INCREMENT, username VARCHAR(255) NOT NULL, password VARCHAR(255) NOT NULL, role VARCHAR(255) NOT NULL)",
-                "INSERT IGNORE INTO users (userid, role, username, password) VALUES (1, 'reviewer', 'guest', '84983c60f7daadc1cb8698621f802c0d9f9a3c3c295c810748fb048115c186ec'), (2, 'data entry', 'data', 'de28c09a560e498b6fb6ecbc45cd0cde'), (3, 'approver', 'approver', '9f3a5e0bdcaa80985b2a03c62203fc1ea761433ac63b0042da4f5f250166c1d0');",
+                "INSERT IGNORE INTO users (userid, role, username, password) VALUES (1, 'reviewer', 'guest', '84983c60f7daadc1cb8698621f802c0d9f9a3c3c295c810748fb048115c186ec'), (2, 'data entry', 'data', 'de28c09a560e498b6fb6ecbc45cd0cde'), (3, 'approver', 'approver', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f');",
 
                 /**
                  * Form data (Our own table for requestData, shared among all roles)
