@@ -100,8 +100,6 @@ public class LoginScreen extends Application {
         }
     
         try {
-            // Connect to the database
-            Connection connection = dbQuery.connect();
     
             // Prepare SQL query to check the username and password
             String query = "SELECT * FROM users WHERE username = ?";
