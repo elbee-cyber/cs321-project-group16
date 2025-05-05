@@ -103,7 +103,8 @@ public class DatabaseQuery {
 
             stmt.executeBatch();
             stmt.close();
-
+/*
+            //COMMENT OUT WHEN DEMOING
             //populate requestdata from request.csv
             try (BufferedReader br = new BufferedReader(new FileReader("src/main/java/edu/gmu/cs321/requests.csv"))) {
                 String line;
@@ -152,6 +153,7 @@ public class DatabaseQuery {
             } catch (IOException | SQLException e) {
                 e.printStackTrace();
             }
+                */
         } catch (Exception e) {
             System.out.println("Error workflow: " + e.getMessage());
         } finally {
