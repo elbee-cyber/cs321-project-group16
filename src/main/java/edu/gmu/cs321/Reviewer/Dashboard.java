@@ -571,8 +571,9 @@ public class Dashboard {
             confirmAlert.showAndWait().ifPresent(response -> {
                 if (response == ButtonType.OK) {
                     try {
-                        // Update the selected queue item to have a status of 'Forwarded'
+                        // Update the selected queue item to have a status of 'Approve'
                         this.workflow.AddWFItem(this.selectedQueueId, "Approve");
+
                         this.form_item.entrySet().removeIf(entry -> entry.getKey().equals(this.selectedQueueId));
                         this.form_ids.removeIf(id -> id.equals(this.selectedQueueId));
 

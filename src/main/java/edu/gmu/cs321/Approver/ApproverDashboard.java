@@ -69,10 +69,11 @@ public class ApproverDashboard {
     private TextField deceasedSSNField = new TextField("Placeholder");
     private TextField deceasedRelaField = new TextField("Placeholder");
     private TextArea reasonReqArea = new TextArea("Placeholder");
+    private Map<Integer, String> dataMap = new LinkedHashMap<>();
+
 
     // Global UI elements
     private TextArea commentsArea = new TextArea();
-    private Button approveButton = new Button("Approve");
     Label paperidLabel = new Label();
     ListView<String> formListView = new ListView<>();
 
@@ -121,17 +122,16 @@ public class ApproverDashboard {
      * @return An array of strings representing the queue data (dates).
      */
     private Map<Integer, String> getQueueDataMap() {
-        Map<Integer, String> dataMap = new LinkedHashMap<>();
         String query = "SELECT form_id, created_at FROM workflow_records WHERE next_step='Approve' ORDER BY created_at DESC";
         this.form_ids.clear();
         this.form_item.clear();
-    
+        this.dataMap.clear();
         try {
             ResultSet rs = dbQuery.executeQuery(query);
             while (rs.next()) {
                 int id = rs.getInt("form_id");
                 String displayText = "Form ID: " + id + " | Created: " + rs.getTimestamp("created_at").toString();
-                dataMap.put(id, displayText);
+                this.dataMap.put(id, displayText);
                 this.form_item.put(id, displayText); // update your internal maps too
                 this.form_ids.add(id);
             }
@@ -139,7 +139,7 @@ public class ApproverDashboard {
             System.out.println("Error Date set: " + e.getMessage());
         }
     
-        return dataMap;
+        return this.dataMap;
     }
     
 
@@ -223,13 +223,13 @@ public class ApproverDashboard {
         Button approveButton = new Button("Approve");
         Button rejectButton = new Button("Send Back For Review");
         TextField commentField = new TextField();
-        commentField.setPromptText("Add rejection comment...");
+        commentField.setPromptText("Add comment for reviewer...");
 
         HBox actions = new HBox(10, approveButton, rejectButton);
         actions.setAlignment(Pos.CENTER);
 
         // Handle approval
-        this.approveButton.setOnAction(e -> {
+        approveButton.setOnAction(e -> {
             Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
             confirmAlert.setTitle("Confirmation");
             confirmAlert.setHeaderText("Forward to Supervisor");
@@ -239,13 +239,12 @@ public class ApproverDashboard {
                 if (response == ButtonType.OK) {
                     try {
                         // Update the selected queue item to have a status of 'Forwarded'
-                        this.workflow.AddWFItem(this.selectedQueueId, "Approve");
-                        this.form_item.entrySet().removeIf(entry -> entry.getKey().equals(this.selectedQueueId));
-                        this.form_ids.removeIf(id -> id.equals(this.selectedQueueId));
-
-                        // Update the corresponding request with Approver edits
-                        String query = "UPDATE requestData SET requestorName=?, requestorAddress=?, requestorSSN=?, requestorCell=?, requestorEmail=?, deceasedName=?, deceasedDOB=?, deceasedSSN=?, deceasedRelationship=?, requestReason=? WHERE formID=" + this.selectedQueueId.toString();
-                        dbQuery.executePUpdate(query, this.nameField.getText(), this.addressArea.getText(), this.ssnField.getText(), this.cellField.getText(), this.emailField.getText(), this.deceasedNameField.getText(), this.deceasedDOBField.getText(), this.deceasedSSNField.getText(), this.deceasedRelaField.getText(), this.reasonReqArea.getText());
+                        String query = "DELETE FROM workflow_records WHERE form_id = ? AND next_step = 'Approve'";
+                        dbQuery.executePUpdate(query, this.selectedQueueId.toString());
+                        this.workflow.AddWFItem(this.selectedQueueId, "Supervisor");
+                        this.dataMap.remove(this.selectedQueueId);
+                        this.formListView.getItems().clear();
+                        this.formListView.getItems().addAll(getQueueDataMap().values());
 
         
 
@@ -267,11 +266,11 @@ public class ApproverDashboard {
         // Ensure a comment has been issued before rejecting
         rejectButton.setOnAction(e -> {
             Alert failAlert = new Alert(Alert.AlertType.ERROR);
-            if (commentsArea.getText().isEmpty()) {
+            if (commentField.getText().isEmpty()) {
                 // Show alert if comments area is empty
                 failAlert.setTitle("Comment Required");
                 failAlert.setHeaderText("Comment Required");
-                failAlert.setContentText("Please provide a comment before rejecting.");
+                failAlert.setContentText("Please provide a comment before sending back.");
                 failAlert.showAndWait();
             } else {
                 try {
@@ -281,17 +280,21 @@ public class ApproverDashboard {
 
 
                     // Move form back to Reviewer queue
-                    String updateQuery = "UPDATE workflow_records SET next_step = 'Review', updated_at = NOW() WHERE form_id = ?";
-                    dbQuery.executePUpdate(updateQuery, this.selectedQueueId); 
+                    String query = "DELETE FROM workflow_records WHERE form_id = ? AND next_step = 'Approve'";
+                    dbQuery.executePUpdate(query, this.selectedQueueId.toString());
+                    this.workflow.AddWFItem(this.selectedQueueId, "Review");
 
+
+                    this.dataMap.remove(this.selectedQueueId);
+                    this.formListView.getItems().clear();
+                    this.formListView.getItems().addAll(getQueueDataMap().values());
                     
-                   
-                    
+
                     // Show success alert
                     Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
-                    successAlert.setTitle("Rejection Successful");
-                    successAlert.setHeaderText("Rejection Successful");
-                    successAlert.setContentText("The paper has been marked as rejected and sent back to Reviewer for review.");
+                    successAlert.setTitle("Sent back to Reviewer");
+                    successAlert.setHeaderText("Sent back to Reviewer");
+                    successAlert.setContentText("The paper has been sent back to Reviewer for review.");
                     successAlert.showAndWait();
                 } catch (Exception ex) {
                     System.out.println("Error Reject: " +ex.getMessage());
