@@ -74,8 +74,7 @@ public class ApproverDashboard {
     private TextArea commentsArea = new TextArea();
     private Button approveButton = new Button("Approve");
     Label paperidLabel = new Label();
-    ListView<form_item> formListView = new ListView<>();
-
+    ListView<String> formListView = new ListView<>();
 
 
     /**
@@ -101,7 +100,7 @@ public class ApproverDashboard {
         formListView.setOnMouseClicked(e -> {
             String selectedItem = formListView.getSelectionModel().getSelectedItem();
             if (selectedItem != null) {
-                for (Map.Entry<Integer, String> entry : form_item.entrySet()) {
+                for (Map.Entry<Integer, String> entry : this.form_item.entrySet()) {
                     if (entry.getValue().equals(selectedItem)) {
                         selectedQueueId = entry.getKey();
                         selectQueueItem();
@@ -204,16 +203,16 @@ public class ApproverDashboard {
         });
 
         // ListView to show submitted forms
-        ListView<form_item> formListView = new ListView<>();
+        //ListView<this.form_item> formListView = new ListView<>();
         formListView.setPrefHeight(400);
         
         // Fetch forms to be reviewed by Approver
         Map<Integer, String> pendingForms = getQueueDataMap(); 
-        formListView.getItems().addAll(pendingForms);
+        formListView.getItems().addAll(pendingForms.values());
         formListView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
                 for (Integer key : pendingForms.keySet()) {
-                    this.selectedQueueId = pendingForms.getKey(); //get the form ID from the Form object
+                    this.selectedQueueId = key; //get the form ID from the Form object
                     selectQueueItem(); // Load form details into fields
                 }
             }
@@ -266,7 +265,6 @@ public class ApproverDashboard {
 
         // Handle rejection
         // Ensure a comment has been issued before rejecting
-        Button rejectButton = new Button("Send Back for Review");
         rejectButton.setOnAction(e -> {
             Alert failAlert = new Alert(Alert.AlertType.ERROR);
             if (commentsArea.getText().isEmpty()) {
