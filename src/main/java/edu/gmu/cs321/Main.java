@@ -50,7 +50,7 @@ public class Main extends Application {
 
         // Set button actions
         approverButton.setOnAction(_ -> edu.gmu.cs321.Approver.LoginScreen.main(new String[]{}));
-        dataEntryButton.setOnAction(_ -> edu.gmu.cs321.DataEntry.LoginScreen.main(new String[]{}));
+        dataEntryButton.setOnAction(_ -> edu.gmu.cs321.dataentry.LoginScreen.main(new String[]{}));
         reviewerButton.setOnAction(_ -> edu.gmu.cs321.Reviewer.LoginScreen.main(new String[]{}));
 
         // Add heading and buttons to a layout

@@ -8,10 +8,10 @@ Rachel Adams,159 Cedar Way, Portland, OR, 97201,678-90-1234,555-678-9012,rachel.
 Michael Chen,753 Walnut Dr, San Jose, CA, 95112,789-01-2345,555-789-0123,michael.chen@example.com,Steven Chen,1949-02-27,321-09-8765,Father,Military service history,Pending Data Entry,2024-03-20,true,true
 Emily Garcia,852 Poplar St, Tampa, FL, 33601,890-12-3456,555-890-1234,emily.garcia@example.com,Carmen Garcia,1970-09-14,210-98-7654,Sister,Legal documentation,Pending Review,2025-01-10,true,true
 Brian Thompson,951 Spruce Ln, Boston, MA, 02108,901-23-4567,555-901-2345,brian.thompson@example.com,George Thompson,1938-06-01,109-87-6543,Grandfather,Court order compliance,Pending Approval,2024-06-25,true,true
-Sophia Martinez,147 Chestnut Ave, Phoenix, AZ, 85001,012-34-5678,555-012-3456,sophia.martinez@example.com,Isabel Martinez,1962-12-08,098-76-5432,Aunt,Ancestry verification,Pending Data Entry,2024-08-30,true,true
+Sophia Martinez,147 Chestnut Ave, Phoenix, AZ, 85001,012-34-5678,555-012-3456,sophia.martinez@example.com,Isabel Martinez,1962-12-08,098-76-5432,Aunt,Ancestry verification,Pending Data Entry,2024-08-30,true,false
 Nathan Brooks,301 Fir St, Raleigh, NC, 27601,135-79-2468,555-111-2222,nathan.brooks@example.com,Hannah Brooks,1959-10-03,234-56-7891,Mother,Death certificate request,Pending Review,2024-04-12,false,true
 Chloe Nguyen,204 Cypress Rd, Houston, TX, 77001,246-80-1357,555-333-4444,chloe.nguyen@example.com,Minh Nguyen,1943-04-17,321-65-4987,Father,Insurance claim,Pending Approval,2024-10-08,false,true
-Dylan Rivera,90 Hemlock Ln, Miami, FL, 33101,357-91-2468,555-222-3333,dylan.rivera@example.com,Carlos Rivera,1960-06-25,567-89-0124,Uncle,Probate court,Pending Data Entry,2025-03-01,false,true
+Dylan Rivera,90 Hemlock Ln, Miami, FL, 33101,357-91-2468,555-222-3333,dylan.rivera@example.com,Carlos Rivera,1960-06-25,567-89-0124,Uncle,Probate court,Pending Data Entry,2025-03-01,false,false
 Isabella Wright,675 Palm Dr, San Diego, CA, 92101,468-02-5791,555-444-5555,isabella.wright@example.com,Margaret Wright,1952-09-09,678-90-1235,Aunt,Academic records,Pending Review,2024-02-17,false,false
 Ethan Patel,48 Dogwood Ave, Atlanta, GA, 30301,579-13-6802,555-555-6666,ethan.patel@example.com,Raj Patel,1936-12-31,789-01-2346,Grandfather,Legal appeal,Pending Approval,2024-11-03,false,true
 Olivia Kim,81 Redwood Blvd, Minneapolis, MN, 55401,680-24-7913,555-666-7777,olivia.kim@example.com,Soo Kim,1948-02-28,890-12-3457,Mother,Immigration record request,Pending Data Entry,2024-01-25,false,true
