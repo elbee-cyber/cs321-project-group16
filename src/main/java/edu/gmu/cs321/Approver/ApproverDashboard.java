@@ -27,19 +27,22 @@ import javafx.scene.layout.Pane;
 import javafx.geometry.Pos;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TableColumn;
-
-
+import java.util.Map;
+import java.util.LinkedHashMap;
+import javafx.scene.control.ListView;
 
 /**
- * Approver Dashboard instance with the specified user details and database connection.
+ * This class represents the user interface for the Approver Dashboard in the immigration request system.
+ * The approver is able to view requests, approve, reject, or send them back, with the ability to enter comments for rejection or sending back.
+ * This class extends Application and is responsible for initializing and displaying the dashboard layout, 
+ * managing request records, and interacting with the approver through buttons and form fields.
  *
  *
  * @param currentUserRole The role of the currently logged-in user (e.g., "Approver").
  * @param currentUser     The name of the currently logged-in user.
- * @param dbQuery              The database query object used for executing queries.
+ * @param dbQuery         The database query object used for executing queries.
  */
 public class ApproverDashboard {
-    // Current user data + DB conn (passed from login)
     
     private String currentUserRole;
     private String currentUser;
@@ -53,14 +56,7 @@ public class ApproverDashboard {
     // Selected top bar item
     private Integer selectedQueueId = 0;
 
-    // Used to record indexes for arrow navigation
-    private int leftIndex;
-    private int rightIndex;
 
-    // Topbar buttons
-    private Button leftArrowButton = new Button("<");
-    private Button rightArrowButton = new Button(">");
-    private ComboBox<String> dateFilter = new ComboBox<>();
 
     // Form view items
     private TextField nameField = new TextField("Placeholder");
@@ -78,12 +74,12 @@ public class ApproverDashboard {
     private TextArea commentsArea = new TextArea();
     private Button approveButton = new Button("Approve");
     Label paperidLabel = new Label();
+    ListView<form_item> formListView = new ListView<>();
 
-    // Last sort order
-    //private String lastSortOrder = "ASC";
+
 
     /**
-     * Constructor for the Dashboard class.
+     * Constructor for the ApproverDashboard class.
      */
     public ApproverDashboard(String currentUserRole, String currentUser, DatabaseQuery dbQuery){
         
@@ -93,112 +89,67 @@ public class ApproverDashboard {
         this.workflow = dbQuery.getWorkflow();
         this.form_item = new HashMap<Integer, String>();
         this.form_ids = new ArrayList<Integer>();
-        this.leftIndex = 0;
-        this.rightIndex = 4;
+        
     }
 
     public Pane getRootPane() {
-        VBox root = new VBox();
-        // Build your dashboard UI here
-        root.getChildren().add(new Label("Welcome to the Approver Dashboard!"));
+        VBox root = new VBox(10);
+        Label heading = new Label("Approver Dashboard");
+    
+        updateQueueListView(formListView);
+    
+        formListView.setOnMouseClicked(e -> {
+            String selectedItem = formListView.getSelectionModel().getSelectedItem();
+            if (selectedItem != null) {
+                for (Map.Entry<Integer, String> entry : form_item.entrySet()) {
+                    if (entry.getValue().equals(selectedItem)) {
+                        selectedQueueId = entry.getKey();
+                        selectQueueItem();
+                        break;
+                    }
+                }
+            }
+        });
+    
+        root.getChildren().addAll(heading, formListView);
         return root;
     }
+    
+    
 
     /**
      * Gets the queue data from the database based on the current filters and navigation buttons.
      * @return An array of strings representing the queue data (dates).
      */
-    private String[] getQueueData() {
+    private Map<Integer, String> getQueueDataMap() {
+        Map<Integer, String> dataMap = new LinkedHashMap<>();
         String query = "SELECT form_id, created_at FROM workflow_records WHERE next_step='Approve' ORDER BY created_at DESC";
         this.form_ids.clear();
         this.form_item.clear();
     
         try {
             ResultSet rs = dbQuery.executeQuery(query);
-            while (rs.next()){
+            while (rs.next()) {
                 int id = rs.getInt("form_id");
-                this.form_item.put(id, rs.getTimestamp("created_at").toString());
+                String displayText = "Form ID: " + id + " | Created: " + rs.getTimestamp("created_at").toString();
+                dataMap.put(id, displayText);
+                this.form_item.put(id, displayText); // update your internal maps too
                 this.form_ids.add(id);
             }
         } catch (Exception e) {
             System.out.println("Error Date set: " + e.getMessage());
         }
     
-        // Adjust left/right indexes
-        if (this.rightIndex >= this.form_ids.size()) {
-            this.rightIndex = this.form_ids.size() - 1;
-            this.leftIndex = Math.max(0, this.rightIndex - 4);
-        }
-    
-        int maxIndex = Math.min(this.rightIndex, this.form_ids.size() - 1);
-        int resultSize = maxIndex - this.leftIndex + 1;
-        String[] results = new String[resultSize];
-    
-        int i = 0;
-        for (int j = this.leftIndex; j <= maxIndex; j++) {
-            Integer id = this.form_ids.get(j);
-            results[i] = this.form_item.get(id);
-            if (i == 0) {
-                this.selectedQueueId = id;
-            }
-            i++;
-        }
-    
-        selectQueueItem();
-        return results;
+        return dataMap;
     }
     
 
-    /**
-     * Updates the queue data displayed in the top bar based on the current filters and navigation buttons.
-     * @param dateBar The HBox containing the date buttons in the top bar.
-     *               This will be updated with the new queue data.
-     */
-    private void updateQueueData(HBox dateBar) {
-        // Button click handlers for navigation
-        leftArrowButton.setOnAction(e -> {
-            if (leftIndex - 5 >= 0) {
-                leftIndex -= 5;
-                rightIndex = leftIndex + 4;
-            } else {
-                leftIndex = 0;
-                rightIndex = Math.min(4, form_ids.size() - 1);
-            }
-            updateQueueData(dateBar); // Refresh UI
-        });
-    
-        rightArrowButton.setOnAction(e -> {
-            if (rightIndex + 1 < form_ids.size()) {
-                leftIndex = rightIndex + 1;
-                rightIndex = Math.min(leftIndex + 4, form_ids.size() - 1);
-            }
-            updateQueueData(dateBar); // Refresh UI
-        });
-    
-        // Get latest queue data (this will also update form_ids & form_item)
-        String[] queueDates = getQueueData();
-        dateBar.getChildren().clear(); // Clear previous buttons
-    
-        // Add arrow buttons and filter to the bar
-        dateBar.getChildren().add(leftArrowButton);
-    
-        int i = leftIndex;
-        for (String date : queueDates) {
-            if (date != null) {
-                Integer queueId = form_ids.get(i);
-                Button dateButton = new Button(date);
-                dateButton.setOnAction(e -> {
-                    selectedQueueId = queueId;
-                    selectQueueItem();
-                });
-                dateBar.getChildren().add(dateButton);
-                i++;
-            }
-        }
-    
-        dateBar.getChildren().add(rightArrowButton);
-        //dateBar.getChildren().add(dateFilter);
+
+    private void updateQueueListView(ListView<String> listView) {
+        Map<Integer, String> queueDataMap = getQueueDataMap();
+        listView.getItems().setAll(queueDataMap.values());
     }
+    
     
 
     /**
@@ -206,28 +157,14 @@ public class ApproverDashboard {
      * This method is called when a queue item is selected from the top bar.
      */
     private void selectQueueItem() {
-        this.paperidLabel.setText("Reviewing Paper ID: " + this.selectedQueueId.toString() + "           ");
-        
-
-        // Update navigation keys if we are resting on a bound
-        if (this.leftIndex <= 0) {
-            this.leftArrowButton.setDisable(true);
-        } else {
-            this.leftArrowButton.setDisable(false);
-        }
-        if (this.rightIndex >= this.form_ids.size()-1) {
-            this.rightArrowButton.setDisable(true);
-        } else {
-            this.rightArrowButton.setDisable(false);
-        }
+        this.paperidLabel.setText("Reviewing Paper ID: " + this.selectedQueueId + "           ");
+    
+    
         try {
-            // Query to get the reviewpaper details based on the selected queue item
-            String query = "SELECT * FROM requestData WHERE formID=" + this.selectedQueueId.toString();
-
+            String query = "SELECT * FROM requestData WHERE formID=" + this.selectedQueueId;
             ResultSet rs = dbQuery.executeQuery(query);
+            
             if (rs.next()) {
-                // Populate the form fields with the retrieved data
-                // paper_id, name, ssn, address, cell, email, deceasedname, deceasedDOB, deceasedSSN, deceasedrela, reason
                 this.nameField.setText(rs.getString("requestorName"));
                 this.addressArea.setText(rs.getString("requestorAddress"));
                 this.ssnField.setText(rs.getString("requestorSSN"));
@@ -246,34 +183,18 @@ public class ApproverDashboard {
             System.out.println("Error requestData: " + e.getMessage());
         }
     }
+    
 
-    /**
-     * Starts the Reviewer Dashboard application.
-     * @param primaryStage The primary stage for this application.
-     */
+    
+
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("Approver Dashboard");
+        // Root layout
+        VBox root = new VBox(10);
+        root.setPadding(new Insets(20));
 
-            // Create the navigation bar
-        HBox navigationBar = new HBox(10);
-        navigationBar.setPadding(new Insets(10));
-        navigationBar.setAlignment(Pos.CENTER);
-        navigationBar.setStyle("-fx-background-color: #f0f0f0;");
+        Label header = new Label("Approver Dashboard");
+        header.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
 
-        
-        // Define navigation buttons
-        Button dashboardBtn = new Button("Dashboard");
-        Button pendingBtn = new Button("Pending");
-        Button approvedBtn = new Button("Approved");
-        Button rejectedBtn = new Button("Rejected");
-
-        // Add buttons to nav bar
-        navigationBar.getChildren().addAll(dashboardBtn, pendingBtn, approvedBtn, rejectedBtn);
-
-        
-
-        // Create the top bar with user+paper info and logout button
-        HBox topBar = new HBox();
         Label userLabel = new Label("Approver: " + this.currentUser + "   ");
         Button logoutButton = new Button("Logout");
         logoutButton.setOnAction(e -> {
@@ -281,159 +202,34 @@ public class ApproverDashboard {
             LoginScreen loginScreen = new LoginScreen();
             loginScreen.start(new Stage()); // Open the login screen in a new window
         });
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-        topBar.getChildren().addAll(spacer, this.paperidLabel, userLabel, logoutButton);
-        topBar.setPadding(new Insets(5));
 
-        // Create the date bar with navigation buttons and filters
-        HBox dateBar = new HBox(5);
-
-        // Left and right arrow buttons for navigation
-        this.leftArrowButton.setDisable(true); // Disable left arrow initially
-        this.leftArrowButton.setOnAction(e -> {
-            this.leftIndex -= 5;
-            this.rightIndex -= 5;
-            updateQueueData(dateBar);
-        });
-        this.rightArrowButton.setOnAction(e -> {
-            this.leftIndex += 5;
-            this.rightIndex += 5;
-            updateQueueData(dateBar);
-        });
-
-        /** 
-        // Date filter
-        this.dateFilter.getItems().addAll("ASC", "DESC");
-        this.dateFilter.setValue("ASC");
-        this.dateFilter.setOnAction(e -> {
-            if (this.dateFilter.getValue().equals(this.lastSortOrder)) {
-                return; // No change in filter, do nothing
-            }
-            this.lastSortOrder = this.dateFilter.getValue();
-            Collections.reverse(this.form_ids);
-            updateQueueData(dateBar);
-        });
-        */
-
-        // Initialize the date bar with the first set of queue data
-        updateQueueData(dateBar);
-        dateBar.setPadding(new Insets(5));
-
-        // Form UI elements
-        Label personalInfoLabel = new Label("Personal Information");
-        personalInfoLabel.setStyle("-fx-font-weight: bold; -fx-padding: 5 0 0 0;");
-
-        // Personal information section
-        GridPane personalInfo = new GridPane();
-        personalInfo.setHgap(10);
-        personalInfo.setVgap(10);
-        personalInfo.setPadding(new Insets(10));
-
-        // Personal information section 
-        personalInfo.add(new Label("Name:"), 0, 0);
-        personalInfo.add(this.nameField, 1, 0);
-
-        personalInfo.add(new Label("Address:"), 0, 1);
-        this.addressArea.setPrefRowCount(3);
-        personalInfo.add(this.addressArea, 1, 1);
+        // ListView to show submitted forms
+        ListView<form_item> formListView = new ListView<>();
+        formListView.setPrefHeight(400);
         
-    
-        personalInfo.add(new Label("SSN:"), 3, 0);
-        personalInfo.add(this.ssnField, 4, 0);
-       
-        personalInfo.add(new Label("Cell:"), 3, 1);
-        personalInfo.add(this.cellField, 4, 1);
-       
-      
-
-        personalInfo.add(new Label("Email:"), 3, 2);
-        personalInfo.add(this.emailField, 4, 2);
-        
-
-        // Deceased information section with checkboxes
-        Label deceasedInfoLabel = new Label("Deceased Immigrant Information");
-        deceasedInfoLabel.setStyle("-fx-font-weight: bold; -fx-padding: 5 0 0 0;");
-
-        GridPane deceasedInfo = new GridPane();
-        deceasedInfo.setHgap(10);
-        deceasedInfo.setVgap(10);
-        deceasedInfo.setPadding(new Insets(10));
-
-        deceasedInfo.add(new Label("Name of Deceased:"), 0, 0);
-        deceasedInfo.add(this.deceasedNameField, 1, 0);
-        
-
-        deceasedInfo.add(new Label("Deceased Date of Birth:"), 3, 0);
-        deceasedInfo.add(this.deceasedDOBField, 4, 0);
-        
-
-        deceasedInfo.add(new Label("Deceased SSN:"), 3, 1);
-        deceasedInfo.add(this.deceasedSSNField, 4, 1);
-        
-
-        deceasedInfo.add(new Label("Relationship to Requestor:"), 3, 2);
-        deceasedInfo.add(this.deceasedRelaField, 4, 2);
-        
-
-        // Reason for request section with checkboxes
-        Label reasonForRequestLabel = new Label("Reason for Request");
-        reasonForRequestLabel.setStyle("-fx-font-weight: bold; -fx-padding: 5 0 0 0;");
-        GridPane reasonForRequest = new GridPane();
-        reasonForRequest.setHgap(10);
-        reasonForRequest.setVgap(10);
-        reasonForRequest.setPadding(new Insets(10));
-        reasonForRequest.add(new Label("Request Reason:"), 0, 0);
-        this.reasonReqArea.setPrefRowCount(3);
-        reasonForRequest.add(this.reasonReqArea, 1, 1);
-        
-
-        // Action buttons and comments section
-        HBox actions = new HBox(10);
-        actions.setPadding(new Insets(10));
-
-        // Comments section
-        VBox commentsBox = new VBox(5);
-        Label commentsLabel = new Label("Comments:");
-        this.commentsArea.setPrefRowCount(2);
-        commentsBox.getChildren().addAll(commentsLabel, this.commentsArea);
-        HBox bottomSection = new HBox(20, actions, commentsBox);
-        bottomSection.setPadding(new Insets(10));
-
-        
-
-        // Ensure a comment has been issued before rejecting
-        Button rejectButton = new Button("Send Back for Review");
-        rejectButton.setOnAction(e -> {
-            Alert failAlert = new Alert(Alert.AlertType.ERROR);
-            if (commentsArea.getText().isEmpty()) {
-                // Show alert if comments area is empty
-                failAlert.setTitle("Comment Required");
-                failAlert.setHeaderText("Comment Required");
-                failAlert.setContentText("Please provide a comment before rejecting.");
-                failAlert.showAndWait();
-            } else {
-                try {
-                    // Remove item
-                    this.form_item.entrySet().removeIf(entry -> entry.getKey().equals(this.selectedQueueId));
-                    this.form_ids.removeIf(id -> id.equals(this.selectedQueueId));
-
-                    
-                    // Refresh the queue data
-                    updateQueueData(dateBar);
-                    
-                    // Show success alert
-                    Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
-                    successAlert.setTitle("Rejection Successful");
-                    successAlert.setHeaderText("Rejection Successful");
-                    successAlert.setContentText("The paper has been marked as rejected and sent back to Reviewer for review.");
-                    successAlert.showAndWait();
-                } catch (Exception ex) {
-                    System.out.println("Error Reject: " +ex.getMessage());
+        // Fetch forms to be reviewed by Approver
+        Map<Integer, String> pendingForms = getQueueDataMap(); 
+        formListView.getItems().addAll(pendingForms);
+        formListView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            if (newSelection != null) {
+                for (Integer key : pendingForms.keySet()) {
+                    this.selectedQueueId = pendingForms.getKey(); //get the form ID from the Form object
+                    selectQueueItem(); // Load form details into fields
                 }
             }
         });
+        
 
+        // Buttons and actions
+        Button approveButton = new Button("Approve");
+        Button rejectButton = new Button("Send Back For Review");
+        TextField commentField = new TextField();
+        commentField.setPromptText("Add rejection comment...");
+
+        HBox actions = new HBox(10, approveButton, rejectButton);
+        actions.setAlignment(Pos.CENTER);
+
+        // Handle approval
         this.approveButton.setOnAction(e -> {
             Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
             confirmAlert.setTitle("Confirmation");
@@ -452,8 +248,7 @@ public class ApproverDashboard {
                         String query = "UPDATE requestData SET requestorName=?, requestorAddress=?, requestorSSN=?, requestorCell=?, requestorEmail=?, deceasedName=?, deceasedDOB=?, deceasedSSN=?, deceasedRelationship=?, requestReason=? WHERE formID=" + this.selectedQueueId.toString();
                         dbQuery.executePUpdate(query, this.nameField.getText(), this.addressArea.getText(), this.ssnField.getText(), this.cellField.getText(), this.emailField.getText(), this.deceasedNameField.getText(), this.deceasedDOBField.getText(), this.deceasedSSNField.getText(), this.deceasedRelaField.getText(), this.reasonReqArea.getText());
 
-                        // Refresh the queue data
-                        updateQueueData(dateBar);
+        
 
                         // Show success alert
                         Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
@@ -469,21 +264,49 @@ public class ApproverDashboard {
             });
         });
 
-        actions.getChildren().addAll(approveButton, rejectButton);
+        // Handle rejection
+        // Ensure a comment has been issued before rejecting
+        Button rejectButton = new Button("Send Back for Review");
+        rejectButton.setOnAction(e -> {
+            Alert failAlert = new Alert(Alert.AlertType.ERROR);
+            if (commentsArea.getText().isEmpty()) {
+                // Show alert if comments area is empty
+                failAlert.setTitle("Comment Required");
+                failAlert.setHeaderText("Comment Required");
+                failAlert.setContentText("Please provide a comment before rejecting.");
+                failAlert.showAndWait();
+            } else {
+                try {
+                    // Remove item
+                    this.form_item.entrySet().removeIf(entry -> entry.getKey().equals(this.selectedQueueId));
+                    this.form_ids.removeIf(id -> id.equals(this.selectedQueueId));
 
-        // Review status label
-        Label reviewStatus = new Label("All items must be corrected and/or marked as approved before forwarding.");
-        reviewStatus.setStyle("-fx-font-weight: bold; -fx-padding: 5 0 0 0; -fx-font-size: 14px;");
 
-        // Layout the components in a VBox
-        VBox mainLayout = new VBox(10);
-        mainLayout.getChildren().addAll(topBar, navigationBar, dateBar, personalInfoLabel, personalInfo, deceasedInfoLabel, deceasedInfo, reasonForRequestLabel, reasonForRequest, bottomSection, reviewStatus);
-        mainLayout.setPadding(new Insets(10));
+                    // Move form back to Reviewer queue
+                    String updateQuery = "UPDATE workflow_records SET next_step = 'Review', updated_at = NOW() WHERE form_id = ?";
+                    dbQuery.executePUpdate(updateQuery, this.selectedQueueId); 
 
-        // Set the scene and show the stage
-        Scene scene = new Scene(mainLayout);
-        //primaryStage.setMaximized(true);
+                    
+                   
+                    
+                    // Show success alert
+                    Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
+                    successAlert.setTitle("Rejection Successful");
+                    successAlert.setHeaderText("Rejection Successful");
+                    successAlert.setContentText("The paper has been marked as rejected and sent back to Reviewer for review.");
+                    successAlert.showAndWait();
+                } catch (Exception ex) {
+                    System.out.println("Error Reject: " +ex.getMessage());
+                }
+            }
+        });
+
+
+        root.getChildren().addAll(header, formListView, commentField, actions);
+
+        Scene scene = new Scene(root, 600, 500);
         primaryStage.setScene(scene);
+        primaryStage.setTitle("Approver Dashboard");
         primaryStage.show();
     }
 
